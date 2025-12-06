@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ############################################################################
+//  ENUMS (列挙型)
+// ############################################################################
+
+/// ユーザー権限
+enum UserRole {
+  user
+  admin
+}
+
+/// 性別
+enum Gender {
+  male
+  female
+  other
+}
+
+// ############################################################################
+//  USER ONLY (ユーザーのみのシンプル構成)
+// ############################################################################
+
+/// ユーザー管理
+model User {
+  id        String   @id @default(ulid())
+  email     String   @unique
+  role      UserRole @default(user)
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  gender    Gender?
+
+  // Audit
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdBy String   @map("created_by")
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy String?   @map("deleted_by")
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// 検索条件保存
+model SearchCondition {
+  id        String @id @default(ulid())
+  formType  String @map("form_type")
+  name      String
+  urlParams String @map("url_params")
+
+  // Audit
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdBy String   @map("created_by")
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy String?   @map("deleted_by")
+
+  @@unique([formType, name])
+  @@index([deletedAt])
+  @@map("search_conditions")
+}

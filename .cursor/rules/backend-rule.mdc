@@ -1,0 +1,712 @@
+---
+alwaysApply: true
+---
+
+---
+
+description: "backend/配下の実装をする前に必ず読むべき内容"
+globs: backend/\*\*
+alwaysApply: true
+
+---
+
+まず、このファイルを理解したら「backend-rule を読みました。」と言ってください。
+このルールは backend/ の開発作業に適用してください。
+
+# 概要
+
+このプロジェクトのバックエンドは、**Nest.js** フレームワークを使用し、**DDD（ドメイン駆動開発）** と **Use Case パターン** を組み合わせたアーキテクチャを採用しています。
+
+## アーキテクチャの特徴
+
+- **機能ごとのモジュール分割**: 各機能（users, search-conditions など）は独立したモジュールとして実装される
+- **Use Case パターン**: 各操作（create, update, delete, find, search）は独立したUse Caseクラスとして実装される
+- **DDD（ドメイン駆動開発）**: ドメインモデル（Entity、Value Object）を中心とした設計
+- **リポジトリパターン**: データアクセスはリポジトリインターフェースを通じて行う
+- **依存性逆転の原則**: Use Caseはリポジトリインターフェースに依存し、実装はinfrastructure層に配置
+
+## ディレクトリ構成
+
+`src` ディレクトリ配下は、機能ごとにモジュールを分割しています。
+
+```
+├── src
+│   ├── app.module.ts          # ルートモジュール
+│   ├── main.ts                # エントリポイント
+│   ├── prisma/                # Prisma設定
+│   │   ├── prisma.module.ts   # PrismaServiceを提供するグローバルモジュール
+│   │   └── prisma.service.ts  # PrismaClientラッパー
+│   ├── config/                # 設定
+│   │   ├── logger.module.ts   # ロガーモジュール
+│   │   └── custom-logger.service.ts  # カスタムロガーサービス
+│   ├── common/                # 共通処理
+│   │   ├── constants/         # 定数定義
+│   │   ├── decorators/        # デコレータ（@CurrentUserなど）
+│   │   ├── enums/             # 列挙型定義
+│   │   ├── errors/            # エラー定義
+│   │   ├── filters/           # フィルター（グローバル例外フィルターなど）
+│   │   ├── interceptors/      # インターセプター（ロギングなど）
+│   │   ├── middleware/        # ミドルウェア（認証など）
+│   │   ├── pipes/             # パイプ（バリデーションパイプなど）
+│   │   ├── services/          # 共通サービス（トレースサービスなど）
+│   │   └── utils/             # ユーティリティ（日付、文字列など）
+│   └── {feature-name}/        # 機能ごとのモジュール（例: users, search-conditions）
+│       ├── {feature-name}.controller.ts  # コントローラー
+│       ├── {feature-name}.module.ts      # モジュール定義
+│       ├── domain/            # ドメイン層
+│       │   └── {feature-name}.repository.interface.ts  # リポジトリインターフェース
+│       ├── dto/               # DTO（データ転送オブジェクト）定義
+│       │   ├── {機能}-request.dto.ts     # リクエストDTO
+│       │   └── {機能}-response.dto.ts    # レスポンスDTO
+│       ├── entities/          # エンティティ（ドメインモデル）
+│       │   └── {feature-name}.entity.ts
+│       ├── infrastructure/     # インフラストラクチャ層
+│       │   ├── {feature-name}.repository.ts  # リポジトリ実装
+│       │   └── persistence/  # 永続化関連
+│       │       ├── prisma-{feature-name}.mapper.ts  # Prismaマッパー
+│       │       └── prisma-{feature-name}-filter.builder.ts  # フィルタービルダー
+│       ├── use-cases/         # ユースケース（アプリケーションサービス層）
+│       │   ├── create-{feature-name}.use-case.ts
+│       │   ├── update-{feature-name}.use-case.ts
+│       │   ├── delete-{feature-name}.use-case.ts
+│       │   ├── find-{feature-name}.use-case.ts
+│       │   └── search-{feature-name}s.use-case.ts
+│       └── value-objects/     # 値オブジェクト（オプション）
+│           └── {value-object-name}.vo.ts
+```
+
+## 依存関係
+
+各層の依存関係は以下の通りです。
+
+- **Controller** → **Use Case** → **Domain (Repository Interface)** ← **Infrastructure (Repository Implementation)**
+- コントローラーはユースケースを呼び出し、ユースケースはリポジトリインターフェースに依存し、リポジトリ実装がインターフェースを実装する
+
+## モジュール構成
+
+### モジュール配置の原則
+
+- **各機能は`src/{feature-name}/`配下に独立したモジュールとして配置する**
+- **モジュールファイル（`{feature-name}.module.ts`）は機能ディレクトリのルートに配置する**
+- **コントローラーファイル（`{feature-name}.controller.ts`）も機能ディレクトリのルートに配置する**
+
+### モジュールの配置例
+
+```
+src/
+  └── users/
+      ├── users.controller.ts      # コントローラー
+      ├── users.module.ts          # モジュール定義
+      ├── domain/
+      ├── dto/
+      ├── entities/
+      ├── infrastructure/
+      ├── use-cases/
+      └── value-objects/
+```
+
+```ts
+// src/users/users.module.ts
+@Module({
+  controllers: [UsersController],
+  providers: [
+    UsersRepository, // リポジトリ実装
+    FindAllUsersUseCase,
+    FindUserUseCase,
+    CreateUserUseCase,
+    UpdateUserUseCase,
+    DeleteUserUseCase,
+    SearchUsersUseCase,
+    ExportUsersUseCase,
+    // PrismaServiceはPrismaModuleから提供されるため、providersには書かない
+  ],
+})
+export class UsersModule {}
+```
+
+### AppModule での使用
+
+- **AppModule では各機能モジュールを直接インポートする**
+- **`PrismaModule`はグローバルモジュールとして`AppModule`でインポートする**
+
+```ts
+// app.module.ts
+@Module({
+  imports: [
+    LoggerModule,
+    PrismaModule, // グローバルモジュールとしてインポート（全モジュールでPrismaServiceが利用可能になる）
+    UsersModule,
+    SearchConditionsModule,
+    MeModule,
+    // ...
+  ],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
+```
+
+### PrismaService の扱い
+
+- **`PrismaService`は必ず`PrismaModule`経由で使用する**
+- **各モジュールの`providers`に`PrismaService`を直接書いてはいけない**
+- **`PrismaModule`はグローバルモジュールとして`AppModule`でインポートする**
+
+#### 理由
+
+複数のモジュールで`PrismaService`を`providers`に直接書くと、NestJS はそれぞれで別々のインスタンス（DB 接続）を作成してしまいます。これにより：
+
+- DB 接続数が増えすぎる
+- シングルトンが保てなくなる
+- メモリの無駄
+
+#### 実装方法
+
+1. **`PrismaModule`を使用**
+   - `src/prisma/prisma.module.ts`で定義されているグローバルモジュールを使用
+   - `@Global()`デコレータにより、一度インポートすれば全モジュールで利用可能
+
+2. **各モジュールでの使用**
+   - `providers`に`PrismaService`を書かない
+   - コンストラクタで直接注入して使用
+   ```typescript
+   @Injectable()
+   export class SomeRepository {
+     constructor(private readonly prisma: PrismaService) {}
+     // PrismaServiceを使用
+   }
+   ```
+
+# Strict Rule
+
+以下の項目は、プロジェクトの整合性を保つ上で特に重要なルールです。これらに違反している箇所を見つけたら、些細なことでも報告してください。
+
+## 開発全般
+
+- データ加工（集計、フィルタリング、結合など）のロジックは、アプリケーションロジックではなく、可能な限りデータベースクエリで完結させること
+  - 例
+    - 条件でフィルタリングする場合、アプリケーションで全件取得せず、WHERE 句を使いデータベースでフィルタリングする
+    - 合計値を計算する場合、アプリケーションで全件取得せず、SUM()関数を使いデータベースで合計する
+
+- **日付操作は必ず DateUtil を使用すること**
+  - `new Date()`や`Date.now()`を直接使用してはいけない
+  - すべての日付操作は`common/utils/date.utils.ts`のユーティリティ関数を使用する
+  - 現在日時を取得する場合は`getCurrentDate()`を使用する
+  - 日付のフォーマットは`formatDateToJST()`や`formatDateToISOString()`を使用する
+
+- **エラーメッセージとバリデーションメッセージは定数から取得すること**
+  - すべてのエラーメッセージとバリデーションメッセージは`common/constants/`配下の定数ファイルから取得する
+  - `common/constants/index.ts`から必要な定数をインポートする
+  - バリデーションメッセージは`validation.ts`の`REQUIRED`、`INVALID`、`MIN_LENGTH`を使用する
+  - 業務エラーメッセージは`business-error.ts`の`CREATE`、`UPDATE`、`ID_REQUIRED`、`getEntityIdRequired`を使用する
+  - リソース未検出エラーメッセージは`not-found-error.ts`の`getResourceNotFound`を使用する
+  - システムエラーメッセージは`system-error.ts`の`INTERNAL_SERVER_ERROR`、`VALIDATION_ERROR`を使用する
+  - 文字列リテラルで直接エラーメッセージやバリデーションメッセージを定義してはいけない
+
+- テスト容易性の確保
+  - DAO 層やリポジトリ層では外部依存（現在時刻、乱数など）を直接使用せず、パラメータとして注入可能にすること
+  - インターフェース設計時にテスト容易性を考慮し、必要に応じて依存性注入を可能にすること
+
+- 型チェックの実行
+  - タスク実行時に既存のコードと整合性が取れているか確認するために、適宜`npm run test`, `npm run tsc`を実行すること
+  - タスク完了時に`npm run fix-all`を実行し、整形すること
+
+- エラーハンドリング
+  - エラーはカスタムエラーを作成し`throw new Error()`を使ってはいけない
+  - **各層でバリデーションを行わない**
+    - バリデーションは各層の責務ではなく、リポジトリ層や DAO 層ではバリデーションを行わない
+    - バリデーションが必要な場合は、アプリケーション層の DTO の中で zod を用いて行う
+  - エラーを投げる場合は、必ずカスタムアプリケーションエラー（`ApplicationError`を継承したエラー）を使用する
+    - リポジトリ層や DAO 層でエラーを投げる場合は、カスタムエラーを使用する
+    - 例外的な状況（予期しないエラーなど）以外で`throw new Error()`を使用してはいけない
+  - エラーメッセージは必ず定数ファイル（`common/constants/`配下）から取得すること
+  - エラーはそれぞれの層で以下のように包み直す
+
+```ts: application-layer-function
+
+function someServiceFunction(){
+  try{
+    someRepositoryMethod()
+  }catch(error){
+    if (error instanceof NotFoundRepositoryError){
+      throw new NotFoundApplicationError(error) // エラーをその層のカスタムエラー型に詰めなおす
+    }
+    throw error
+  }
+}
+
+```
+
+## Command
+
+- ドメイン層とアプリケーション層以外はユビキタス言語で記載しない。
+  - コントローラー層、リポジトリ層は`create`や`update`等の RESTAPI の言葉で記載すること
+- `upsert`ではなく`create`と`update`を使うこと
+  - `upsert`は楽観的ロックが使えないため使用しない
+  - Query 側の DAO を使って存在確認を行い、存在する場合は`update`、存在しない場合は`create`を実行する
+  - try-catch はなるべく使わない
+- **infrastructure 層はインターフェースにする**
+  - リポジトリは`domain/`配下にインターフェースを定義し、`infrastructure/`で実装する
+  - アプリケーション層（Use Case）はインターフェースに依存する
+- **リポジトリの引数は Entity にする**
+  - リポジトリインターフェースのメソッド引数は、個別のプロパティではなく Entity オブジェクトを受け取る
+  - Entity は`entities/`配下に定義する
+  - 例: `create(user: UserEntity): Promise<UserEntity>`
+- **リポジトリの戻り値はドメインエンティティにする**
+  - リポジトリのメソッドは Prisma の型（例: `User`）ではなく、ドメインエンティティ（例: `UserEntity`）を返す
+  - Prisma から取得したデータは、Mapper クラスの`toEntity`メソッドを使用してドメインエンティティに変換する
+  - 例:
+    ```ts
+    async create(entity: UserEntity): Promise<UserEntity> {
+      const data = PrismaUserMapper.toPrismaInput(entity);
+      const created = await this.prisma.user.create({ data });
+      return PrismaUserMapper.toEntity(created);
+    }
+    ```
+- **Mapper クラスの実装**
+  - Mapper クラスは`infrastructure/persistence/`配下に定義する
+  - クラス名は`Prisma{FeatureName}Mapper`とする（例: `PrismaUserMapper`）
+  - Mapper クラスには以下のメソッドを実装する
+    - `toEntity(data: PrismaType): Entity`: Prisma の型からドメインエンティティに変換
+    - `toPrismaInput(entity: Entity): Prisma.UserUncheckedCreateInput`: ドメインエンティティから Prisma の保存用データ形式に変換（`id`、`createdAt`、`updatedAt`は含めない）
+  - `toPrismaInput`の戻り値の型は、`Omit`や`Partial`を使わず、明示的な型定義（`Prisma.UserUncheckedCreateInput`など）を使用する
+  - 例:
+    ```ts
+    static toPrismaInput(entity: UserEntity): Prisma.UserUncheckedCreateInput {
+      const p = entity.toPrimitives();
+      return {
+        id: p.id,
+        email: p.email,
+        role: p.role,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        gender: p.gender,
+        createdBy: p.createdBy,
+        updatedBy: p.updatedBy,
+        deletedAt: p.deletedAt ?? null,
+        deletedBy: p.deletedBy ?? null,
+      };
+    }
+    ```
+- **Use Case パターンの実装**
+  - 各操作（create, update, delete, find, search）は`use-cases/`配下に独立したUse Caseクラスとして実装する
+  - Use Caseクラス名は`{操作}{FeatureName}UseCase`とする（例: `CreateUserUseCase`, `SearchUsersUseCase`）
+  - Use Caseは`@Injectable()`デコレータを付与し、リポジトリをコンストラクタで注入する
+  - 例:
+
+    ```ts
+    @Injectable()
+    export class CreateUserUseCase {
+      constructor(
+        private readonly usersRepository: UsersRepository,
+        private readonly logger: CustomLoggerService,
+      ) {}
+
+      async execute(params: CreateUserParams): Promise<UserResponseDto> {
+        // ビジネスロジック
+      }
+    }
+    ```
+
+- **イベントタイプは定数で管理する**
+  - イベントタイプが必要な場合は`{feature-name}/constants/event-types.ts`に定数として定義する
+  - 文字列リテラルを直接使用しない
+- 外部サービスと連携しているテーブルは、直接更新してはいけない
+  - 外部サービスから連携されているか否かは Prisma のコメントアウトを確認
+- 外部連携はコントローラー層、サービス層、リポジトリ層で別ファイルで定義すること
+  - ドメイン層で定義しているインターフェースも別で定義する
+  - 例：カレンダー登録(GoogleCalendar)に関する処理を含むファイルは分割する
+    - backend/src/command/controller/interview-slot/http/interview-slot.controller.ts
+    - backend/src/command/controller/interview-slot/http/interview-slot-calendar.controller.ts
+- **Outbox パターンの実装**
+  - 外部システムと連携するテーブルを更新する際は、outbox テーブルにイベントを記録する
+  - リポジトリ層でトランザクション内で outbox エントリを作成する
+- **Entity の作成はファクトリメソッドを使用する**
+  - サービス層で Entity を`new`で直接作成してはいけない
+  - Entity クラスには`static create`メソッドを実装し、コンストラクターは`private`にする
+  - Entity の作成は必ずファクトリメソッド（`static create`）を使用する
+  - 例:
+
+    ```ts
+    export class SearchConditionEntity {
+      private constructor(props: SearchConditionProps) {
+        // ...
+      }
+
+      static create(props: SearchConditionProps): SearchConditionEntity {
+        return new SearchConditionEntity(props);
+      }
+    }
+    ```
+
+- **Value Object（値オブジェクト）の積極的な使用**
+  - **VOは積極的に使うべき**: 特に「バリデーション」や「ルール」がある値は必ずVOにする
+  - **プリミティブ型強迫観念（Primitive Obsession）を避ける**: ドメインにとって意味のある値はVOにする
+  - **VOにすべき基準**:
+    - 値に**「ルール」や「振る舞い」**がある場合（バリデーションが必要なもの、特定の形式があるもの）
+    - 複数の値がセットで意味を持つもの（姓名、住所、お金など）
+  - **VOにしなくていい場合**:
+    - 単なるフラグ（boolean）で、特別なルールがない場合
+    - システム内部でしか使わない一時的なカウンタなど
+    - 「説明文（description）」のように、文字数制限以外に特にルールがなく、ロジックも発生しないもの
+  - **VOの中にロジックを持たせる**: そのデータだけを使って完結する計算（`getFullName`、`isExpired`、`add(Money)`など）はVOに入れる
+    - データ（姓・名）とそのデータを使ったロジック（フルネームを返す）は、近くにあるべき（高凝集）
+    - ロジックをエンティティやサービスに書くと、コードが散らばる
+  - **エンティティを軽くする**: VOに細かいルールやロジックを任せることで、エンティティは「いつ、何をするか」という重要なビジネスフローの記述に集中できる
+  - **VOの特徴**:
+    - 不変（Immutable）。値が変わる時は新しいVOを作る
+    - 値が同じなら同じとみなす（値による等価性）
+    - 自己完結する計算・フォーマットロジックを持つ
+  - **エンティティとVOの責務の分け方**:
+    - **VO**: 自己完結する計算・フォーマット（例：フルネーム結合、金額の加算、日付のフォーマット）
+    - **Entity**: 状態変化・ドメインの調整（例：パスワード変更、申し込みステータスの更新）
+  - 実装例:
+
+    ```ts
+    // 姓と名をセットで扱うVO
+    export class UserName {
+      constructor(
+        private readonly firstName: string,
+        private readonly lastName: string,
+      ) {
+        if (!firstName || !lastName) throw new DomainError('姓名は必須です');
+      }
+
+      // ✅ ロジックはVOに持たせる（計算プロパティ）
+      get fullName(): string {
+        return `${this.lastName} ${this.firstName}`;
+      }
+
+      // ✅ 「表示用」のロジックを持たせてもいい
+      get formalName(): string {
+        return `${this.lastName} ${this.firstName} 様`;
+      }
+
+      // ✅ イニシャルを返すロジックとかもここ
+      get initials(): string {
+        return `${this.lastName[0]}.${this.firstName[0]}`;
+      }
+    }
+
+    // エンティティで使う
+    export class UserEntity {
+      // エンティティはプリミティブを持たず、VOを持つ
+      private _userName: UserName;
+
+      constructor(userName: UserName) {
+        this._userName = userName;
+      }
+
+      // エンティティはVOのメソッドを呼ぶだけ（委譲）
+      get name(): string {
+        return this._userName.fullName;
+      }
+    }
+    ```
+
+- ビジネスロジックの実装可能箇所は Domain ロジックに記載
+- ドメインサービスは以下の制約にしたがって実装する
+  - 複数 entity に渡る処理
+  - infra 層（外部依存）を利用してはいけない
+    - infra 層を利用する場合は、アプリケーションサービスに記載する
+    - **どこにも依存していないか？**を基準に考える
+
+## Query（読み取り処理）
+
+- 原則「読み取り専用」。リポジトリ層での書き込み操作（create/update/delete/upsert/raw-insert 等）は禁止
+- 複雑な集計・フィルタは DB 側（Prisma/SQL）で完結させる（アプリ側で全件ロードしない）
+- **読み取り処理もUse Caseパターンで実装する**
+  - 検索や取得処理も`use-cases/`配下に独立したUse Caseクラスとして実装する
+  - 例: `FindUserUseCase`, `SearchUsersUseCase`, `FindAllUsersUseCase`
+- **DTO 変換は Entity の`toPrimitives()`メソッドを使用する**
+  - Entity には`toPrimitives()`メソッドを実装し、DTO形式のデータを返す
+  - Use Caseでは`entity.toPrimitives()`を呼び出してDTOに変換する
+  - 例:
+
+    ```ts
+    // Entity内
+    toPrimitives(): UserResponseDto {
+      return {
+        id: this.props.id,
+        email: this.email,
+        role: this.role,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        gender: this.gender,
+        createdAt: this.props.createdAt,
+        createdBy: this.props.createdBy,
+        updatedAt: this.props.updatedAt,
+        updatedBy: this.props.updatedBy,
+        deletedAt: this.props.deletedAt,
+        deletedBy: this.props.deletedBy,
+      };
+    }
+
+    // Use Case内
+    const entities = await this.usersRepository.findAll(filter);
+    return entities.map((user) => user.toPrimitives());
+    ```
+
+- **`recruit_year_id`を持つテーブルの検索条件には、必ずフロントから渡される`recruitYearId`を含める**
+  - クエリパラメータから`recruitYearId`を取得し、DAO 層でフィルタリング条件に含める
+  - 例: `findAll({ recruitYearId })`で`recruitYearId`を必須パラメータとして受け取る
+  - **`recruitYearId`は NULL 許容しない**（必須パラメータ）
+  - **DTO でバリデーションを必ずかける**
+    - `ZodValidationPipe`を使用して、コントローラー層で DTO をバリデーションする
+    - `recruitYearId`は必須で、正の整数であることをバリデーションする
+    - 例: `z.string().min(1, '年度IDは必須です').transform((val) => Number(val)).refine((val) => !Number.isNaN(val) && val > 0, { message: '年度IDは正の整数である必要があります' })`
+
+# コーディングスタイル
+
+## 関数とクラス
+
+- **メソッドは原則 1 つの責任を持つように分割する**
+  - メソッドが長くなる場合は、意味のある単位で適切に分割する
+  - 可読性と保守性を向上させる
+  - ただし、Prisma のクエリビルド（include や where がネストする場合）、Zod のスキーマ定義、Mapper の変換ロジックなど、構造的に縦に長くなる場合は無理に分割せず、可読性を優先する
+
+- 関数の引数は常に keyword arguments 形式で記載すること
+  - 引数が 2 つ以上の場合は必ずオブジェクト形式で受け取る
+  - 例: `function example({ param1, param2 }: { param1: string; param2: number })`
+
+- **DTO の命名は Request/Response を明示的に定義する**
+  - リクエスト用: `{機能}RequestDto` または `{機能}RequestSchema`
+  - レスポンス用: `{機能}ResponseDto`
+  - 例: `UpdateRecruitYearRequestDto`, `RecruitYearResponseDto`
+  - **DTOファイル名もRequest/Responseを含める**
+    - リクエスト用: `{機能}-request.dto.ts`
+    - レスポンス用: `{機能}-response.dto.ts`
+    - 例: `create-user-request.dto.ts`, `user-response.dto.ts`
+
+- **ページネーションクエリパラメータは共通DTOスキーマを使用する**
+  - ページネーションが必要なエンドポイントでは、`paginationQuerySchema`という共通のDTOスキーマを使用する
+  - 複数のスキーマをマージする場合は`.merge()`を使用する
+  - 例:
+    ```ts
+    @Get('search/detail')
+    async search(
+      @Query(
+        new ZodValidationPipe(
+          searchUserRequestSchema.merge(paginationQuerySchema),
+        ),
+      )
+      query: SearchUserRequestDto & PaginationQueryDto,
+    ): Promise<UserListResponseDto> {
+      // ...
+    }
+    ```
+
+- **ユーザーIDの取得は`@CurrentUser()`デコレータを使用する**
+  - コントローラー層で`@CurrentUser()`デコレータを使用してユーザーIDを取得する
+  - `create`、`update`、`delete`操作では、必ず`userId`をuse-caseに渡す
+  - 例:
+    ```ts
+    @Post()
+    async create(
+      @CurrentUser() userId: string,
+      @Body(new ZodValidationPipe(createUserRequestSchema))
+      dto: CreateUserRequestDto,
+    ): Promise<UserResponseDto> {
+      return this.createUserUseCase.execute({
+        // ...
+        userId,
+      });
+    }
+    ```
+
+- **バリデーションは DTO 内で自動実行する**
+  - コントローラー層で手動バリデーションを行わない
+  - `ZodValidationPipe`を使用して DTO 内で自動バリデーションを実行する
+
+- バリデーション関数の 返り値は Boolean とする
+  - 関数内で条件を満たさない場合は、`throw new Error`ではなく、false を返すこと
+
+## 可読性と型安全
+
+- any 型や型アサーション（`as`）、非ヌル宣言（`!`）は原則用いない
+  - 用いる場合は必ずコメントアウトで理由を添えること
+  - Prisma クライアントの型エラーは、マイグレーションを実行して`prisma generate`で解決すること
+  - 型アサーションで回避するのではなく、スキーマを更新して Prisma クライアントを再生成すること
+
+- **分岐や switch は極力使わず、マッピングやオブジェクトを使用する**
+  - 条件分岐は可読性を下げ、バグの温床になりやすい
+  - マッピングやオブジェクトを使うことで、データ駆動的なコードになり保守性が向上する
+
+  ```ts
+  # OK: マッピングを使用
+  const statusColorMap: Record<string, string> = {
+    success: "green",
+    error: "red",
+    warning: "yellow",
+  };
+  const color = statusColorMap[status] || "gray";
+
+  const logLevelMap: Record<
+    string,
+    { method: 'error' | 'warn' | 'log'; trace?: string }
+  > = {
+    error: { method: 'error', trace: undefined },
+    warn: { method: 'warn' },
+    log: { method: 'log' },
+  };
+  const logConfig = logLevelMap[level] || logLevelMap.log;
+
+  # NG: 分岐を使用
+  let color: string;
+  if (status === "success") {
+    color = "green";
+  } else if (status === "error") {
+    color = "red";
+  } else if (status === "warning") {
+    color = "yellow";
+  } else {
+    color = "gray";
+  }
+
+  # NG: switchを使用
+  switch (status) {
+    case "success":
+      color = "green";
+      break;
+    case "error":
+      color = "red";
+      break;
+    case "warning":
+      color = "yellow";
+      break;
+    default:
+      color = "gray";
+  }
+  ```
+
+- if 文はネストが深くならないように記述すること（原則 2 段まで）
+  - 複雑なネストによる可読性低下・バグ混入を防ぐ
+  - ただし、マッピングやオブジェクトで代替できない場合のみ使用する
+
+- ハードコーディングはしないこと。
+  - 検証環境や本番環境によって異なりそうなもの定数は.env で管理すること
+
+## エラーとログ
+
+- エラーメッセージはすべて日本語で表示すること
+- ログ出力は`console.log`系ではなく`this.logger.log`のようなカスタムログ出力を用いること
+  - `backend/src/config/custom-logger.service.ts`を DI して用いること
+- **ログ戦略**
+  - **すべてのログに`traceId`を自動付与**
+    - CLS（Continuation Local Storage）を使用してリクエストごとのコンテキストを管理
+    - `LoggingInterceptor`がリクエストごとに`traceId`を生成し、CLS に保存
+    - `CustomLoggerService`が自動的に CLS から`traceId`を取得してログに含める
+  - **構造化ログ（JSON 形式）で出力**
+    - すべてのログは以下の JSON 形式で出力される
+    ```json
+    {
+      "traceId": "01KAYWZQY4BDMP31RCX6GRWV7D",
+      "timestamp": "2025-11-26T01:38:28.422Z",
+      "level": "LOG",
+      "context": "RepositoryName",
+      "message": "ログメッセージ"
+    }
+    ```
+  - **ログレベルの使い分け**
+    - `log`: 通常の情報ログ（デフォルト）
+    - `warn`: 警告（400 番台の HTTP エラー、バリデーションエラーなど）
+    - `error`: エラー（500 番台の HTTP エラー、予期しないエラーなど）
+    - `debug`: デバッグ情報（開発環境のみ）
+    - `verbose`: 詳細情報（開発環境のみ）
+  - **ログの出力方法**
+
+    ```typescript
+    @Injectable()
+    export class SomeService {
+      constructor(private readonly logger: CustomLoggerService) {}
+
+      someMethod() {
+        this.logger.log('処理が完了しました', 'SomeService');
+        this.logger.warn('警告メッセージ', 'SomeService');
+        this.logger.error(error, undefined, 'SomeService');
+      }
+    }
+    ```
+
+  - **エラーハンドリングでのログ出力**
+    - リポジトリ層やサービス層の`catch`ブロックでエラーログを必ず出力する
+    - カスタムエラーに変換する前にログを出力
+    ```typescript
+    try {
+      // 処理
+    } catch (error) {
+      this.logger.error(error, undefined, 'RepositoryName');
+      // カスタムエラーに変換
+      throw new NotFoundError('リソース', id);
+    }
+    ```
+  - **ログ出力のベストプラクティス**
+    - エラーログは必ず出力する（`catch`ブロックで予期しないエラーが発生した場合は必ずログを出力）
+    - コンテキスト名を適切に設定する（サービス層: `ServiceName`、リポジトリ層: `RepositoryName`、コントローラー層: `ControllerName`）
+    - エラーログにはスタックトレースを含める（`this.logger.error(error, undefined, 'Context')`の形式で、Error オブジェクトを渡すと自動的にスタックトレースが含まれる）
+    - 機密情報を含めない（パスワード、トークン、個人情報などはログに出力しない）
+
+- エラーレスポンスは以下のような形式で記載し簡易的な記載は行わないこと
+
+  ```ts
+  // OK
+  throw new HttpException(
+    {
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'ログインパスワードは6-15文字で、空白を含んでいてはいけません',
+      error: 'Bad Request',
+    },
+    HttpStatus.BAD_REQUEST,
+    {
+      cause: error,
+    },
+  );
+
+  // NG
+  throw new BadRequestException(
+    'ログインパスワードは6-15文字で、空白を含んでいてはいけません',
+  );
+  ```
+
+# テスト
+
+## 開発全般
+
+- テストでは固定値を使用し、再現性と安定性を確保すること
+- 動的な値（new Date()など）をテストで使用する場合は、テストの意図を明確にすること
+- 必ず「正常系」,「異常系」をプレフィックスとして設けること
+  - 例
+    - `it('異常系: メモが1000文字を超過する場合', async () => {`
+    - `it('正常系: 面接官作成成功', async () => {`
+- 新規作成した関数や例外を投げる処理があれば必ずテストケースに含める
+- 境界条件は必ずテストケースに含める
+
+## Command
+
+- controller 層と repository 層のテストでは、モックを利用せず、直接 DB を使用してテスト
+
+## Query
+
+- **Controller/Service 層**: モックテストで OK
+- **DAO 層**: 実 DB（Docker などで立ち上げたテスト用 DB）を使った結合テストを推奨
+  - DAO 層の主な責務は「複雑な SQL（Prisma クエリ）の構築」であるため、Prisma をモックしてしまうと「フィルタリング条件が正しいか」「結合（include/join）が正しいか」「生クエリの構文が合っているか」という、Query 側で最も担保したいロジックがテストできません
+  - モックテストでは「Prisma を呼んだこと」しか確認できず、バグ（例：WHERE 句の条件ミス）を見逃す可能性が高いです
+  - Prisma の挙動を含めてテストすることで、Query 側の品質を担保します
+
+## テストコード（結合テスト・E2E テスト）
+
+- **テスト前に必ずデータベースをクリーンアップすること**
+  - `beforeEach`でテストで使用するテーブルのデータを削除する
+  - 並列実行時の競合を防ぐため、`afterEach`だけでなく`beforeEach`でもクリーンアップを行う
+  - 例: `await prisma.company.deleteMany(); await prisma.recruitYear.deleteMany();`
+- **テスト後にデータベースをクリーンアップすること**
+  - `afterEach`でテストで使用するテーブルのデータを削除する
+  - テストが終了した後にアプリケーションをクローズする
+  - 例: `await prisma.company.deleteMany(); await prisma.recruitYear.deleteMany(); await app.close();`
+- **リポジトリ層のエラーハンドリングテスト**
+  - Prisma のエラーコード`P2025`（レコードが見つからない）をキャッチし、適切なカスタムエラー（`NotFoundError`など）をスローする
+  - リポジトリ層の`update`メソッドなどで、存在しない ID で更新しようとした場合は 404 エラーを返すようにする
+  - 例: `if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') { throw new NotFoundError('会社', company.id); }`
+- **編集したテストコードは必ずローカルで実行して確認すること**
+  - `npm run test`を実行して、テストが正常に通過することを確認する
+  - テストを修正した場合は、必ずローカルで実行して問題がないことを確認してからコミットする

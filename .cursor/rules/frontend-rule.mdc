@@ -1,0 +1,872 @@
+---
+alwaysApply: true
+---
+
+---
+
+description:
+globs: frontend/\*\*
+alwaysApply: true
+
+---
+
+まず、このファイルを参照したら「frontend-rule を読みました。」と言ってください。
+このルールは frontend/ 以下の修正に適用するようにしてください。
+
+# フロントエンド開発ガイドライン
+
+## 技術スタック
+
+- 言語: TypeScript (^5)
+- JS ライブラリ: React (^19.2.0)
+- フレームワーク: Next.js (^16.0.0)
+- スタイリング: Tailwind CSS (^4)
+- フォームライブラリ: react-hook-form (^7.66.1)
+- バリデーション: フロントエンドでは react-hook-form、バックエンドで zod
+- トースト通知: react-hot-toast (^2.6.0)
+- リンター: ESLint (^9)
+
+## ディレクトリ構成
+
+```
+src/
+├── app/                    # ルーティング関連のみ（URL構造）
+│   ├── {role}/            # 権限別のページ（例: master/）
+│   │   ├── layout.tsx     # 権限チェックを行うlayout
+│   │   └── {page}/        # 権限が必要なページ
+│   │       └── page.tsx   # Next.jsのページコンポーネント
+│   ├── layout.tsx         # ルートレイアウト
+│   ├── page.tsx           # トップページ
+│   ├── error.tsx          # グローバルエラーバウンダリー
+│   ├── not-found.tsx      # 404エラーページ
+│   └── globals.css        # グローバルスタイル
+│
+├── components/            # 共通コンポーネント
+│   ├── layout/            # レイアウトコンポーネント（Header, Footer, Breadcrumb, NavigationLinks）
+│   ├── ui/                # UIコンポーネント（Button, Input, Select, Textarea, Checkbox, Radio, Form, Loading, Title, ColorPicker, Dialog, Table）
+│   └── form/              # フォームコンポーネント（FormField, TextField, SelectField, TextareaField）
+│
+├── features/              # 機能ごとのドメインロジック
+│   └── {feature-name}/
+│       ├── components/    # 機能固有のコンポーネント
+│       ├── hooks/         # 機能固有のカスタムフック
+│       └── types/         # 機能固有の型定義（Colocation）
+│                          # または schema.ts に定義
+│
+├── contexts/              # React Context（RecruitYearContext, UserContext, BreadcrumbContext）
+│                          # - RecruitYearContext: 年度情報のグローバル管理
+│                          # - UserContext: ログインユーザー情報のグローバル管理
+│                          # - BreadcrumbContext: パンくずリストのグローバル管理
+├── hooks/                 # グローバルフック（useAuth）
+├── libs/                  # ライブラリ設定（api-client.ts）
+├── types/                 # アプリケーション全体で共有する型定義
+│                          # - User, RecruitYear などの共通エンティティ
+│                          # - API共通レスポンス型など
+└── constants/             # 定数（theme.ts）
+```
+
+## コーディングスタイル
+
+## 型チェックの実行
+
+- タスク実行時に既存のコードと整合性が取れているか確認するために、適宜`npm run typecheck`, `npm run lint`を実行すること
+- タスク完了時に`npm run format`を実行し、整形すること
+
+### Export 方式
+
+- **named export を使用** (default export は禁止)
+- フレームワーク依存の default export のみ許容
+
+```tsx
+// OK
+export const Component = () => { ... }
+
+// NG
+export default Component
+```
+
+### 関数定義
+
+- **アロー関数式を使用**
+
+```tsx
+// OK
+const handleClick = () => { ... }
+
+// NG
+function handleClick() { ... }
+```
+
+### 型定義
+
+- **type 文を使用** (interface 禁止)
+- 同一型の重複定義を防ぎ、追跡容易性を向上
+
+```tsx
+// OK
+type User = {
+  id: number;
+  name: string;
+}
+
+// NG
+interface User { ... }
+```
+
+### コンポーネント分割
+
+- **1 ファイル 1 コンポーネントの原則**
+- 1 つのファイルには 1 つのコンポーネントのみを定義する
+- 複数のコンポーネントが必要な場合は、それぞれを別ファイルに分割する
+- 可読性と保守性を向上させる
+
+```tsx
+// OK: 1ファイル1コンポーネント
+// components/UserSearchForm.tsx
+export const UserSearchForm = () => { ... }
+
+// components/UserManagement.tsx
+export const UserManagement = () => { ... }
+
+// NG: 1ファイルに複数コンポーネント
+// components/UserManagement.tsx
+const UserSearchForm = () => { ... }
+export const UserManagement = () => { ... }
+```
+
+### 分岐と条件分岐
+
+- **分岐や switch は極力使わず、マッピングやオブジェクトを使用する**
+  - 条件分岐は可読性を下げ、バグの温床になりやすい
+  - マッピングやオブジェクトを使うことで、データ駆動的なコードになり保守性が向上する
+
+  ```tsx
+  # OK: マッピングを使用
+  const statusColorMap: Record<string, string> = {
+    success: "green",
+    error: "red",
+    warning: "yellow",
+  };
+  const color = statusColorMap[status] || "gray";
+
+  const errorMessageExtractorMap: Record<
+    string,
+    (error: unknown) => string
+  > = {
+    ApiClientError: (error) =>
+      error instanceof ApiClientError ? error.message : "",
+    Error: (error) => (error instanceof Error ? error.message : ""),
+  };
+
+  # NG: 分岐を使用
+  let color: string;
+  if (status === "success") {
+    color = "green";
+  } else if (status === "error") {
+    color = "red";
+  } else if (status === "warning") {
+    color = "yellow";
+  } else {
+    color = "gray";
+  }
+
+  # NG: switchを使用
+  switch (status) {
+    case "success":
+      color = "green";
+      break;
+    case "error":
+      color = "red";
+      break;
+    case "warning":
+      color = "yellow";
+      break;
+    default:
+      color = "gray";
+  }
+  ```
+
+## インポート
+
+- **インポートは`@/`エイリアスを使用する**（相対パスは使用しない）
+- 例: `import { Button } from "@/components/ui";`
+- 例: `import { useRecruitYear } from "@/contexts/RecruitYearContext";`
+- 例: `import { Dashboard } from "@/features/dashboard/components/Dashboard";`
+
+## コンポーネント設計
+
+### ロジックの配置
+
+- **features 配下のロジックは必ず hooks に切り出す**
+- コンポーネントには表示ロジックのみを記載
+- ビジネスロジック、データ取得・加工処理は`hooks/`にカスタムフックを作成して配置
+
+```tsx
+// OK: features/page1/hooks/useUserData.ts
+export const useUserData = () => {
+  // ロジックをhooksに記載
+  const processUserData = (data) => { ... }
+  return { processUserData };
+};
+
+// features/page1/index.tsx
+export const Page1 = () => {
+  const { processUserData } = useUserData();
+  return <div>{/* 表示のみ */}</div>;
+};
+
+// NG: ロジックを直接コンポーネントに記載
+export const Page1 = () => {
+  const processUserData = (data) => { ... }  // NG
+  return <div>...</div>;
+};
+```
+
+### 共通化原則
+
+- **必要以上に共通化しない**
+- 全画面共通 UI・同一画面内同一 UI のみ共通化
+- 特定画面の UI・機能が異なる UI は共通化しない
+
+### レイアウト
+
+- **Tailwind CSS のクラスを使用してレイアウトを実装する**
+- `flex`, `grid`, `space-y-*`, `gap-*`などの Tailwind クラスを活用する
+
+```tsx
+// OK: Tailwind CSSのクラスを使用
+<div className="flex flex-col gap-4">
+  <ComponentA />
+  <ComponentB />
+</div>
+
+// OK: Gridレイアウト
+<div className="grid grid-cols-2 gap-6">
+  <ComponentA />
+  <ComponentB />
+</div>
+```
+
+## フォーム開発
+
+### フォーム管理パターン
+
+フォーム管理は`react-hook-form`の`FormProvider`と`useFormContext`、`useFormState`を使用したパターンを採用します。
+
+#### 基本構造
+
+1. **`FormProvider`**: `useForm`から取得した`methods`を`FormProvider`で提供
+2. **`FormField`コンポーネント**: フィールドのラベル、エラー表示を管理（`useFormState`でエラーを取得）
+3. **フィールドコンポーネント**: `TextField`、`SelectField`、`TextareaField`など、各入力タイプに対応したコンポーネント（`useFormState`でエラーを取得）
+
+#### 使用例
+
+```tsx
+import { useForm, FormProvider } from 'react-hook-form';
+import { Button } from '@/components/ui';
+import { TextField, SelectField } from '@/components/form';
+
+type FormData = {
+  name: string;
+  email: string;
+  role: string;
+};
+
+export const MyForm = () => {
+  const methods = useForm<FormData>({
+    defaultValues: { name: '', email: '', role: '' },
+    mode: 'onSubmit', // 送信時にバリデーション
+    reValidateMode: 'onChange', // 再バリデーションは変更時
+  });
+
+  const handleSubmit = methods.handleSubmit((data) => {
+    // フォーム送信処理
+    // サーバーサイドのバリデーションエラーは methods.setError で設定可能
+    void submitData(data, methods.setError);
+  });
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit} noValidate>
+        <TextField
+          name="name"
+          label="名前"
+          rules={{ required: '名前は必須です' }}
+        />
+        <TextField
+          name="email"
+          label="メールアドレス"
+          rules={{ required: 'メールアドレスは必須です' }}
+        />
+        <SelectField
+          name="role"
+          label="権限"
+          options={roleOptions}
+          rules={{ required: '権限は必須です' }}
+        />
+        <Button type="submit">送信</Button>
+      </form>
+    </FormProvider>
+  );
+};
+```
+
+#### コンポーネント構成
+
+- **`components/form/FormField.tsx`**: フィールドのラベル、エラー表示を管理（`useFormState`でエラーを取得）
+- **`components/form/TextField.tsx`**: テキスト入力フィールド（`useFormState`でエラーを取得）
+- **`components/form/SelectField.tsx`**: セレクトボックスフィールド（`useFormState`でエラーを取得）
+- **`components/form/TextareaField.tsx`**: テキストエリアフィールド（`useFormState`でエラーを取得）
+
+#### ルール
+
+- **`useForm`と`FormProvider`を直接使用**: コンポーネント内で`useForm`を呼び出し、`FormProvider`でフォームコンテキストを提供する
+- **`mode: "onSubmit"`と`reValidateMode: "onChange"`を設定**: 初回バリデーションは送信時、再バリデーションは変更時に実行
+- **`useFormState`でエラーを取得**: `FormField`、`TextField`、`SelectField`、`TextareaField`では`useFormState({ control })`を使用してエラーを取得する（`formState.errors`を直接使用すると変更検知されない場合がある）
+- **`handleSubmit`の第 2 引数は不要**: RHF が自動的にバリデーションエラーを`formState.errors`に設定するため、エラーハンドリング用の第 2 引数コールバックは不要
+- **バリデーションは`rules`プロパティで指定**: 各フィールドコンポーネントの`rules`プロパティでバリデーションルールを指定
+- **エラーメッセージは自動表示**: `FormField`コンポーネントが自動的にエラーメッセージを表示
+- **サーバーサイドのバリデーションエラーは`setError`で設定**: API から返されたフィールド固有のエラーは`methods.setError`で設定し、RHF のエラー表示機構を利用する
+- **`Input`コンポーネントはシンプルに**: label や error 表示は含めず、純粋な input 要素のみを提供
+- **フロントエンドでは zod を使用しない**（バリデーションは react-hook-form の機能で完結）
+- **バックエンドの DTO で zod によるバリデーションを実施**
+
+#### フィールドコンポーネントの実装例
+
+```tsx
+// components/form/FormField.tsx
+import { useFormContext, useFormState } from 'react-hook-form';
+
+export const FormField = ({ name, label, children }) => {
+  const { control } = useFormContext();
+  const { errors } = useFormState({ control }); // useFormStateで確実にエラーを検知
+
+  const errorMessage = errors[name]?.message;
+
+  return (
+    <div className="flex flex-col gap-1 w-full">
+      {label && (
+        <label className="font-medium text-sm text-gray-700">{label}</label>
+      )}
+      {children}
+      {errorMessage && <p className="text-red-500 text-xs">{errorMessage}</p>}
+    </div>
+  );
+};
+
+// components/form/TextField.tsx
+import { useFormContext, useFormState } from 'react-hook-form';
+import { Input } from '../ui/Input';
+import { FormField } from './FormField';
+
+export const TextField = ({ name, label, rules, ...props }) => {
+  const { register, control } = useFormContext();
+  const { errors } = useFormState({ control }); // useFormStateで確実にエラーを検知
+
+  return (
+    <FormField name={name} label={label}>
+      <Input {...register(name, rules)} error={!!errors[name]} {...props} />
+    </FormField>
+  );
+};
+```
+
+### 型定義ガイドライン
+
+#### 型定義
+
+- **フォームの型は直接定義する**（zod のスキーマから生成しない）
+- **型の命名**: アッパーケースで `{機能} + FormData`
+- 例: 応募者編集画面の場合 → `ApplicantUpdateFormData`
+
+#### 型定義の配置場所
+
+- **機能（Feature）に閉じた型定義**: `features/{feature-name}/types/` または `features/{feature-name}/schema.ts` に配置する（Colocation）
+  - フォームの型定義、機能固有の DTO、機能内で使用する型など
+  - 変更時の影響範囲が見えやすく、保守性が高い
+  - 例: `features/user-management/types/user-form.ts`、`features/user-management/schema.ts`
+- **アプリケーション全体で共有する型定義**: `src/types/` に配置する
+  - 共通エンティティ型（User, RecruitYear など）
+  - API 共通レスポンス型
+  - アプリケーション全体で使用される型
+  - 例: `src/types/user.ts`、`src/types/recruit-year.ts`
+
+#### 完全なサンプル
+
+```tsx
+// features/user-management/types/user-form.ts（機能固有の型）
+export type UserSearchFormData = {
+  id: string;
+  search: string;
+  role: UserRole | '';
+  gender: Gender | '';
+  departmentId: string;
+};
+
+// src/types/user.ts（アプリケーション全体で共有する型）
+export type UserResponseDto = {
+  id: string;
+  email: string;
+  role: UserRole;
+  // ...
+};
+```
+
+### API リクエスト方針
+
+- **API 呼び出しは直接`libs/api-client.ts`の`apiClient`を使用する**
+- **`services/`ディレクトリは使用しない**
+- **fetch 処理は`libs/api-client.ts`で共通化する**
+- **DTO の命名は Request/Response を明示的に定義する**
+
+```tsx
+// libs/api-client.ts
+export const apiClient = async <T,>(
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> => {
+  // 共通のfetch処理
+};
+
+// hooks/useUserManagement.ts または コンポーネント内
+import { apiClient } from '@/libs/api-client';
+import type { UserResponseDto } from '@/types/user';
+
+const handleSubmit = async (data: FormData) => {
+  const user = await apiClient<UserResponseDto>('/users', {
+    method: 'POST',
+    body: data,
+  });
+  // ...
+};
+```
+
+### バリデーション方針
+
+- クライアント: submit 時バリデーション実施
+- サーバー: zod の関数でバリデーション実施
+
+## 権限管理
+
+### 権限階層
+
+- **権限は階層構造を持つ**（user < admin < master）
+- `useAuth`フックの`hasRole`関数を使用して権限チェックを行う
+- `hasRole(requiredRole)`は、ユーザーの権限が`requiredRole`以上の場合に`true`を返す
+
+```tsx
+// hooks/useAuth.ts
+const roleHierarchy: Record<UserRole, number> = {
+  user: 1,
+  admin: 2,
+  master: 3,
+};
+
+const hasRole = (requiredRole: UserRole): boolean => {
+  if (!user) return false;
+  return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+};
+```
+
+### 権限チェックの実装
+
+- **権限チェックは layout で行う**
+- 権限が必要なページは`app/{role}/`配下に配置する（例: `app/master/`）
+- layout で権限がない場合は`/unauthorized`にリダイレクトする
+
+```tsx
+// app/master/layout.tsx
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+
+export default function MasterLayout({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const { isMaster } = useAuth();
+
+  useEffect(() => {
+    if (!isMaster()) {
+      router.push('/unauthorized');
+    }
+  }, [isMaster, router]);
+
+  if (!isMaster()) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
+```
+
+### ダッシュボードでの権限フィルタリング
+
+- **ダッシュボードはリンク集として実装する**
+- リンク配列に`requiredRole`を定義し、`hasRole`でフィルタリングする
+- 上位権限は下位権限のリンクも表示される（例: master は user/admin/master のリンクを表示）
+
+```tsx
+// features/dashboard/components/Dashboard.tsx
+type DashboardLink = {
+  href: string;
+  label: string;
+  description: string;
+  requiredRole: UserRole;
+};
+
+const dashboardLinks: DashboardLink[] = [
+  {
+    href: '/applicants/search',
+    label: '応募者検索',
+    description: '応募者情報を検索・閲覧します',
+    requiredRole: 'user',
+  },
+  {
+    href: '/admin/bulk-processing',
+    label: '一括処理',
+    description: '一括での処理を実行します',
+    requiredRole: 'admin',
+  },
+];
+
+const visibleLinks = dashboardLinks.filter((link) =>
+  hasRole(link.requiredRole),
+);
+```
+
+## エラーハンドリング
+
+### エラーページ
+
+- **500 エラー**: `app/error.tsx`でグローバルエラーバウンダリーを実装
+- **404 エラー**: `app/not-found.tsx`でページが見つからない場合の表示
+- **権限エラー**: `app/unauthorized/page.tsx`で権限がない場合の表示
+
+### エラーメッセージの表示
+
+- **バックエンドからのエラーメッセージを画面に表示する**
+- `ApiClientError`を使用してエラーメッセージを適切に処理する
+- **フィールド固有のバリデーションエラーは`setError`で設定**: サーバーから返されたバリデーションエラーは`setError`を使用して RHF のエラー表示機構を利用する
+- **一般的なエラーメッセージはトーストで表示**: `react-hot-toast`を使用してトースト通知で表示する
+- **成功メッセージもトーストで表示**: 処理成功時は`toast.success`を使用してトースト通知で表示する
+
+```tsx
+import { ApiClientError } from '@/libs/api-client';
+import { toast } from 'react-hot-toast';
+
+// フォーム送信処理の例
+const handleSubmit = async (
+  data: FormData,
+  setError: UseFormSetError<FormData>,
+) => {
+  try {
+    await updateData(data);
+    toast.success('更新しました');
+  } catch (err) {
+    if (err instanceof ApiClientError && err.details) {
+      // サーバーサイドのバリデーションエラー（フィールド固有）
+      err.details.forEach((detail) => {
+        setError(detail.path[0] as keyof FormData, {
+          type: 'server',
+          message: detail.message,
+        });
+      });
+    } else if (err instanceof ApiClientError) {
+      // 一般的なAPIエラー
+      toast.error(err.message);
+    } else if (err instanceof Error) {
+      toast.error(err.message);
+    } else {
+      toast.error('更新に失敗しました');
+    }
+  }
+};
+```
+
+#### トースト通知の設定
+
+`Toaster`コンポーネントを`app/layout.tsx`または`Providers.tsx`に配置する:
+
+```tsx
+import { Toaster } from 'react-hot-toast';
+
+export const Providers = ({ children }) => {
+  return (
+    <>
+      {children}
+      <Toaster position="top-right" />
+    </>
+  );
+};
+```
+
+## UI コンポーネント
+
+### 共通 UI コンポーネント一覧
+
+- **Button**: ボタンコンポーネント
+- **Input**: シンプルなテキスト入力フィールド（label や error 表示なし）
+- **Textarea**: シンプルなテキストエリア（label や error 表示なし）
+- **Select**: シンプルなセレクトボックス（label や error 表示なし、options 対応）
+- **Checkbox**: チェックボックス
+- **Radio**: ラジオボタン
+- **Loading**: ローディング表示
+- **Title**: ページタイトル
+- **ColorPicker**: カラーピッカー（react-color 使用）
+- **Dialog**: モーダルダイアログ
+- **Table**: 汎用テーブル（カラム定義、カスタムレンダリング対応）
+- **FormField**: フィールドのラベル、エラー表示を管理（`useFormState`でエラーを取得）
+- **TextField**: テキスト入力フィールド（FormField + Input、`useFormState`でエラーを取得）
+- **SelectField**: セレクトボックスフィールド（FormField + Select、`useFormState`でエラーを取得）
+- **TextareaField**: テキストエリアフィールド（FormField + Textarea、`useFormState`でエラーを取得）
+- **Icons**: 各種アイコンコンポーネント（SearchIcon, ResetIcon, PlusIcon, SaveIcon, CancelIcon など）
+
+### ローディング画面
+
+- **ローディング画面は別コンポーネントとして実装する**
+- `components/ui/Loading.tsx`を使用する
+- メッセージは props で受け取れるようにする
+
+```tsx
+import { Loading } from '@/components/ui';
+
+if (!data) {
+  return <Loading />;
+}
+```
+
+### ダイアログ
+
+- **Dialog コンポーネントを使用してモーダルを実装する**
+- `isOpen`、`onClose`、`title`、`children`、`footer`（オプション）、`size`（オプション）を props で受け取る
+- ESC キーで閉じる、バックドロップクリックで閉じる機能が組み込まれている
+
+```tsx
+import { Dialog, Button } from '@/components/ui';
+
+const [isOpen, setIsOpen] = useState(false);
+
+<Dialog
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="確認"
+  footer={
+    <>
+      <Button onClick={() => setIsOpen(false)}>キャンセル</Button>
+      <Button onClick={handleConfirm}>確定</Button>
+    </>
+  }
+>
+  <p>本当に削除しますか？</p>
+</Dialog>;
+```
+
+### テーブル
+
+- **Table コンポーネントを使用してテーブルを実装する**
+- `columns`（カラム定義）、`data`（データ配列）、`emptyMessage`（オプション）を props で受け取る
+- カスタムレンダリング関数を`render`プロパティで指定可能
+
+```tsx
+import { Table } from '@/components/ui';
+
+<Table
+  columns={[
+    { key: 'name', label: '名前' },
+    { key: 'email', label: 'メール' },
+    {
+      key: 'status',
+      label: 'ステータス',
+      render: (value) => <span className="text-green-600">{value}</span>,
+    },
+  ]}
+  data={users}
+  emptyMessage="データがありません"
+/>;
+```
+
+### 画像最適化
+
+- **Next.js の Image コンポーネントを使用する**
+- ヘッダーなど above the fold（最初に見える部分）の画像には`loading="eager"`と`priority`を設定する
+
+```tsx
+import Image from 'next/image';
+
+<Image
+  src="/ats_logo.svg"
+  alt="Ats"
+  width={150}
+  height={50}
+  loading="eager"
+  priority
+/>;
+```
+
+## Breadcrumb 管理
+
+- **BreadcrumbContext を使用してパンくずリストを管理する**
+- 各ページの`useEffect`で`setItems`を呼び出してパンくずリストを設定する
+- Header コンポーネントで自動的に表示される
+
+```tsx
+import { useBreadcrumb } from '@/contexts/BreadcrumbContext';
+import { useEffect } from 'react';
+
+export default function MyPage() {
+  const { setItems } = useBreadcrumb();
+
+  useEffect(() => {
+    setItems([{ label: 'ホーム', href: '/' }, { label: 'マイページ' }]);
+  }, [setItems]);
+
+  return <div>...</div>;
+}
+```
+
+## データ取得と検索
+
+### SWR と apiClient の使い分け
+
+データ取得には、**SWR** と **apiClient** を使い分けます。
+
+| シチュエーション | 具体例                                   | 使うべき道具  | 理由                                            |
+| ---------------- | ---------------------------------------- | ------------- | ----------------------------------------------- |
+| 画面描画         | ユーザー一覧画面、詳細画面の表示         | **useSWR**    | ローディング・キャッシュ管理が必要だから        |
+| イベント処理     | 「登録」ボタンを押した時のバリデーション | **apiClient** | ユーザー操作のタイミングで1回だけ実行したいから |
+| サーバー側       | app/users/page.tsx での初期データ取得    | **apiClient** | SWR（フック）はサーバーで動かないから           |
+| データ更新       | POST / PUT / DELETE                      | **apiClient** | データの変更（Mutation）だから                  |
+
+#### 実装例
+
+```tsx
+// ✅ OK: 画面描画（一覧・詳細）→ useSWR
+import { useSWRData } from '@/libs/swr-client';
+
+export const useUserList = () => {
+  const searchKey = useMemo(() => `/users?${params.toString()}`, [params]);
+  const { data, isLoading, error } = useSWRData<UserListResponseDto>(searchKey);
+  return { users: data?.users || [], isLoading, error };
+};
+
+export const useUserDetail = ({ userId }: { userId: string }) => {
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useSWRData<UserResponseDto>(userId ? `/users/${userId}` : null);
+  return { user, isLoading, error };
+};
+
+// ✅ OK: イベント処理・データ更新 → apiClient
+import { apiClient } from '@/libs/api-client';
+
+const handleSubmit = async (data: FormData) => {
+  try {
+    await apiClient('/users', {
+      method: 'POST',
+      body: data,
+    });
+    toast.success('作成しました');
+  } catch (err) {
+    toast.error('作成に失敗しました');
+  }
+};
+```
+
+- **URL 駆動（URL-Driven）であること**
+  - 検索条件やページネーションなどの状態は、URL パラメータで管理する
+  - `handleSearch`や`handleReset`で直接 API を叩くのではなく、`router.push`で URL を更新し、その変更を検知してデータ取得を行う
+  - データの流れを一方向（Unidirectional）に保つことで、コードの複雑さを軽減し、デバッグを容易にする
+  - `useSearchParams()`から取得できる値をそのまま使用し、`useState`でローカル状態として管理しない
+    - ❌ NG: `useState`で`searchParams`を管理し、URL パラメータ変更時に`useEffect`で同期する
+    - ✅ OK: `useSearchParams()`から直接値を取得し、URL パラメータの変更を`useEffect`で検知してデータ取得を実行する
+  - Effect の連鎖（Effect Chain）を避け、不要な再レンダリングを防ぐ
+
+```tsx
+// ✅ OK: URL駆動パターン
+export const useUserList = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [users, setUsers] = useState([]);
+
+  // URLパラメータから直接値を取得
+  const getSearchParams = useCallback(() => {
+    return {
+      id: searchParams.get('id') || '',
+      search: searchParams.get('search') || '',
+      page: Number(searchParams.get('page')) || 1,
+    };
+  }, [searchParams]);
+
+  // URLパラメータの変更を検知してデータ取得
+  const fetchUsers = useCallback(async () => {
+    const params = getSearchParams();
+    // API呼び出し...
+  }, [getSearchParams]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleSearch = (data: SearchFormData) => {
+    // URLのみを変更（状態は直接更新しない）
+    router.push(`/users?search=${data.search}`);
+  };
+
+  const handleReset = () => {
+    // URLのみを変更（状態は直接更新しない）
+    router.push('/users');
+  };
+};
+
+// ❌ NG: useStateで状態管理するパターン（Effectの連鎖が発生）
+export const useUserList = () => {
+  const searchParamsFromUrl = useSearchParams();
+  const [searchParams, setSearchParams] = useState(() => {
+    // 初期化...
+  });
+
+  // URLパラメータが変更されたら状態を更新
+  useEffect(() => {
+    const params = getSearchParamsFromUrl();
+    setSearchParams(params); // 再レンダリング発生
+  }, [searchParamsFromUrl]);
+
+  // 状態が変更されたらデータ取得
+  useEffect(() => {
+    fetchUsers(); // 再度データ取得
+  }, [searchParams]);
+};
+```
+
+- **`recruit_year_id`を持つテーブルの検索条件には、必ずフロントで管理している`selectedRecruitYear`を含める**
+  - `useRecruitYear`フックから`selectedRecruitYear`を取得し、API クエリパラメータに`recruitYearId`として含める
+  - 例: `/companies?recruitYearId=${selectedRecruitYear.recruitYear}`
+
+- **年度が変更されたら一律でダッシュボード画面に遷移させる**
+  - `RecruitYearContext`で年度変更を検知し、現在のパスがダッシュボード（`/`）でない場合にダッシュボードに遷移する
+  - 初期化時（初回選択時）は遷移しない
+
+- **マス面の一覧画面はユーザー管理と同じように検索機能と CSV 機能を持つ**
+  - 検索フォーム（`*SearchForm`コンポーネント）を実装する
+    - 参考実装: `frontend/src/features/user-management/components/UserSearchForm.tsx`
+    - ID 検索（カンマ/スペース区切り可）とテキスト検索フィールドを持つ
+  - CSV 出力、CSV アップロード、CSV テンプレートダウンロード機能を実装する
+    - 参考実装: `frontend/src/features/user-management/hooks/useUserManagement.ts` の `useUserCsv` フック
+    - CSV 出力: `handleExportCSV` 関数を実装
+    - CSV テンプレートダウンロード: `handleDownloadTemplateCSV`（一括登録用）、`handleDownloadEditTemplateCSV`（一括編集用）を実装
+    - CSV アップロード: `handleUploadCSV` 関数を実装（`isEdit` パラメータで登録/編集を切り替え）
+  - ユーザー管理の実装パターンを参考に実装する
+    - 検索フォーム: `frontend/src/features/user-management/components/UserSearchForm.tsx`
+    - CSV 機能フック: `frontend/src/features/user-management/hooks/useUserCsv.ts`
+    - CSV 定数: `frontend/src/features/user-management/constants/user-csv.constants.ts`
+
+## Node.js バージョン
+
+- 現在: Node.js 22 使用

@@ -1,0 +1,31 @@
+{
+  "name": "hagimon-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "format:backend": "cd backend && npm run format",
+    "format:frontend": "cd frontend && npx prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "format": "npm run format:backend && npm run format:frontend",
+    "prepare": "husky || true",
+    "setup:lint": "npm install && npm run prepare"
+  },
+  "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.7.4"
+  },
+  "lint-staged": {
+    "backend/**/*.{ts,tsx}": [
+      "npx prettier --write"
+    ],
+    "frontend/**/*.{ts,tsx}": [
+      "npx prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "npx prettier --write"
+    ]
+  }
+}
