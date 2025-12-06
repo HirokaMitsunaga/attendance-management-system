@@ -17,11 +17,16 @@ function StatusBadge({ status }: { status: '未出勤' | '勤務中' | '退勤�
   );
 }
 // Mock data
-const todayStatus = {
+const todayStatus: {
+  clockIn: string | null;
+  clockOut: string | null;
+  workingHours: string;
+  status: '未出勤' | '勤務中' | '退勤済';
+} = {
   clockIn: '09:02',
   clockOut: null,
   workingHours: '5時間32分',
-  status: '勤務中' as const, // 未出勤 | 勤務中 | 退勤済
+  status: '勤務中', // 未出勤 | 勤務中 | 退勤済
 };
 
 export const AttendanceInfo = () => {
@@ -67,7 +72,7 @@ export const AttendanceInfo = () => {
             <Button
               size="lg"
               className="flex-1 gap-2"
-              disabled={todayStatus.status !== '勤務中'}
+              disabled={todayStatus.status !== '未出勤'}
             >
               <Clock className="h-4 w-4" />
               出勤
