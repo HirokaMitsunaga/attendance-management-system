@@ -1,7 +1,5 @@
+import AttendanceDashboard from '@/features/attendance/components/attendance-dashboard';
+
 export default function Home() {
-  return (
-    <main>
-      <h1>Hello, World!</h1>
-    </main>
-  );
+  return <AttendanceDashboard />;
 }

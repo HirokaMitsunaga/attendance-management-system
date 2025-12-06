@@ -1,0 +1,89 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock } from 'lucide-react';
+import React from 'react';
+
+function StatusBadge({ status }: { status: '未出勤' | '勤務中' | '退勤済' }) {
+  const variants = {
+    未出勤: 'bg-muted text-muted-foreground',
+    勤務中: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
+    退勤済: 'bg-blue-500/15 text-blue-600 border-blue-500/20',
+  };
+  return (
+    <Badge variant="outline" className={`${variants[status]} font-medium`}>
+      {status}
+    </Badge>
+  );
+}
+// Mock data
+const todayStatus = {
+  clockIn: '09:02',
+  clockOut: null,
+  workingHours: '5時間32分',
+  status: '勤務中' as const, // 未出勤 | 勤務中 | 退勤済
+};
+
+export const AttendanceInfo = () => {
+  return (
+    <div>
+      {' '}
+      <Card className="shadow-lg">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="h-5 w-5 text-primary" />
+            今日の勤怠ステータス
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">ステータス</span>
+            <StatusBadge status={todayStatus.status} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-xl bg-muted/50 p-4">
+              <p className="text-sm text-muted-foreground">出勤時刻</p>
+              <p className="mt-1 text-2xl font-bold text-foreground">
+                {todayStatus.clockIn || '--:--'}
+              </p>
+            </div>
+            <div className="rounded-xl bg-muted/50 p-4">
+              <p className="text-sm text-muted-foreground">退勤時刻</p>
+              <p className="mt-1 text-2xl font-bold text-foreground">
+                {todayStatus.clockOut || '--:--'}
+              </p>
+            </div>
+            <div className="rounded-xl bg-muted/50 p-4">
+              <p className="text-sm text-muted-foreground">勤務時間</p>
+              <p className="mt-1 text-2xl font-bold text-foreground">
+                {todayStatus.workingHours || '--'}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
+            <Button
+              size="lg"
+              className="flex-1 gap-2"
+              disabled={todayStatus.status !== '勤務中'}
+            >
+              <Clock className="h-4 w-4" />
+              出勤
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="flex-1 gap-2"
+              disabled={todayStatus.status !== '勤務中'}
+            >
+              <Clock className="h-4 w-4" />
+              退勤
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
