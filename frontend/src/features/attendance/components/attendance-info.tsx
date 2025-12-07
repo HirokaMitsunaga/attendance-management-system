@@ -6,6 +6,7 @@ import {
   ATTENDANCE_STATUS,
   AttendanceStatus,
 } from '../types/attendance-status';
+import { StatCard } from './stat-card';
 
 function StatusBadge({ status }: { status: AttendanceStatus }) {
   const variants = {
@@ -29,7 +30,7 @@ const todayStatus: {
   status: AttendanceStatus;
 } = {
   clockIn: '09:02',
-  clockOut: null,
+  clockOut: '',
   workingHours: '5時間32分',
   status: ATTENDANCE_STATUS.WORKING,
 };
@@ -50,24 +51,17 @@ export const AttendanceInfo = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground">出勤時刻</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">
-              {todayStatus.clockIn || '--:--'}
-            </p>
-          </div>
-          <div className="rounded-xl bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground">退勤時刻</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">
-              {todayStatus.clockOut || '--:--'}
-            </p>
-          </div>
-          <div className="rounded-xl bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground">勤務時間</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">
-              {todayStatus.workingHours || '--'}
-            </p>
-          </div>
+          <StatCard
+            label="出勤時刻"
+            value={todayStatus.clockIn}
+            placeholder="--:--"
+          />
+          <StatCard
+            label="退勤時刻"
+            value={todayStatus.clockOut}
+            placeholder=" --:-- "
+          />
+          <StatCard label="勤務時間" value={todayStatus.workingHours} />
         </div>
 
         {/* Action Buttons */}
