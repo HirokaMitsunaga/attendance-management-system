@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
@@ -7,21 +6,8 @@ import {
   AttendanceStatus,
 } from '../types/attendance-status';
 import { StatCard } from './stat-card';
+import { AttendanceStatusBadge } from './attendance-status-badge';
 
-function StatusBadge({ status }: { status: AttendanceStatus }) {
-  const variants = {
-    [ATTENDANCE_STATUS.NOT_STARTED]: 'bg-muted text-muted-foreground',
-    [ATTENDANCE_STATUS.WORKING]:
-      'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
-    [ATTENDANCE_STATUS.FINISHED]:
-      'bg-blue-500/15 text-blue-600 border-blue-500/20',
-  };
-  return (
-    <Badge variant="outline" className={`${variants[status]} font-medium`}>
-      {status}
-    </Badge>
-  );
-}
 // Mock data
 const todayStatus: {
   clockIn: string | null;
@@ -47,7 +33,7 @@ export const AttendanceInfo = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">ステータス</span>
-          <StatusBadge status={todayStatus.status} />
+          <AttendanceStatusBadge status={todayStatus.status} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -8,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { REQUEST_STATUS, RequestStatus } from '../types/request-status';
-import { EmptyValue } from '@/components/ui/empty-value';
+import { REQUEST_STATUS } from '../types/request-status';
+import { RequestStatusBadge } from './request-status-badge';
 
 const attendanceHistory = [
   {
@@ -53,23 +52,6 @@ const attendanceHistory = [
     requestStatus: REQUEST_STATUS.REJECTED,
   },
 ];
-
-function RequestStatusBadge({ status }: { status: RequestStatus }) {
-  if (!status) return <EmptyValue />;
-  const variants = {
-    [REQUEST_STATUS.PENDING]:
-      'bg-amber-500/15 text-amber-600 border-amber-500/20',
-    [REQUEST_STATUS.APPROVED]:
-      'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
-    [REQUEST_STATUS.REJECTED]:
-      'bg-destructive/15 text-destructive border-destructive/20',
-  };
-  return (
-    <Badge variant="outline" className={`${variants[status]} font-medium`}>
-      {status}
-    </Badge>
-  );
-}
 
 export const AttendanceHistory = () => {
   return (
