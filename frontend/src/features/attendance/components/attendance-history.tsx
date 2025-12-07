@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { REQUEST_STATUS, RequestStatus } from '../types/request-status';
 
 const attendanceHistory = [
   {
@@ -22,7 +23,7 @@ const attendanceHistory = [
     clockIn: '09:15',
     clockOut: '18:30',
     hours: '8時間15分',
-    requestStatus: '承認' as const,
+    requestStatus: REQUEST_STATUS.APPROVED,
   },
   {
     date: '2025/01/03',
@@ -36,22 +37,18 @@ const attendanceHistory = [
     clockIn: '09:30',
     clockOut: '18:00',
     hours: '7時間30分',
-    requestStatus: '申請中' as const,
+    requestStatus: REQUEST_STATUS.PENDING,
   },
   {
     date: '2025/01/01',
     clockIn: '09:00',
     clockOut: '18:00',
     hours: '8時間00分',
-    requestStatus: '却下' as const,
+    requestStatus: REQUEST_STATUS.REJECTED,
   },
 ];
 
-function RequestStatusBadge({
-  status,
-}: {
-  status: '申請中' | '承認' | '却下' | null;
-}) {
+function RequestStatusBadge({ status }: { status: RequestStatus }) {
   if (!status) return <span className="text-muted-foreground">-</span>;
   const variants = {
     申請中: 'bg-amber-500/15 text-amber-600 border-amber-500/20',

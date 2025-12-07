@@ -2,6 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
+import {
+  ATTENDANCE_STATUS,
+  AttendanceStatus,
+} from '../types/attendance-status';
 
 function StatusBadge({ status }: { status: '未出勤' | '勤務中' | '退勤済' }) {
   const variants = {
@@ -20,12 +24,12 @@ const todayStatus: {
   clockIn: string | null;
   clockOut: string | null;
   workingHours: string;
-  status: '未出勤' | '勤務中' | '退勤済';
+  status: AttendanceStatus;
 } = {
   clockIn: '09:02',
   clockOut: null,
   workingHours: '5時間32分',
-  status: '勤務中', // 未出勤 | 勤務中 | 退勤済
+  status: ATTENDANCE_STATUS.WORKING,
 };
 
 export const AttendanceInfo = () => {
