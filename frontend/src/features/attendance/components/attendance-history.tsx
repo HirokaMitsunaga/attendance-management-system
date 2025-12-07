@@ -66,9 +66,9 @@ export const AttendanceHistory = () => {
   return (
     <div>
       {' '}
-      <Card className="mt-6 shadow-lg">
+      <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-lg">最近の勤怠履歴</CardTitle>
+          <CardTitle>最近の勤怠履歴</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

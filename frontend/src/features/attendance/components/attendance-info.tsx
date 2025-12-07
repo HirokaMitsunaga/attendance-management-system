@@ -38,9 +38,9 @@ export const AttendanceInfo = () => {
   return (
     <div>
       {' '}
-      <Card className="shadow-lg">
+      <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             今日の勤怠ステータス
           </CardTitle>
