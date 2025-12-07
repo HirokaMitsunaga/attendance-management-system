@@ -7,11 +7,13 @@ import {
   AttendanceStatus,
 } from '../types/attendance-status';
 
-function StatusBadge({ status }: { status: '未出勤' | '勤務中' | '退勤済' }) {
+function StatusBadge({ status }: { status: AttendanceStatus }) {
   const variants = {
-    未出勤: 'bg-muted text-muted-foreground',
-    勤務中: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
-    退勤済: 'bg-blue-500/15 text-blue-600 border-blue-500/20',
+    [ATTENDANCE_STATUS.NOT_STARTED]: 'bg-muted text-muted-foreground',
+    [ATTENDANCE_STATUS.WORKING]:
+      'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
+    [ATTENDANCE_STATUS.FINISHED]:
+      'bg-blue-500/15 text-blue-600 border-blue-500/20',
   };
   return (
     <Badge variant="outline" className={`${variants[status]} font-medium`}>
@@ -75,7 +77,7 @@ export const AttendanceInfo = () => {
             <Button
               size="lg"
               className="flex-1 gap-2"
-              disabled={todayStatus.status !== '未出勤'}
+              disabled={todayStatus.status !== ATTENDANCE_STATUS.NOT_STARTED}
             >
               <Clock className="h-4 w-4" />
               出勤
@@ -84,7 +86,7 @@ export const AttendanceInfo = () => {
               size="lg"
               variant="secondary"
               className="flex-1 gap-2"
-              disabled={todayStatus.status !== '勤務中'}
+              disabled={todayStatus.status !== ATTENDANCE_STATUS.WORKING}
             >
               <Clock className="h-4 w-4" />
               退勤
