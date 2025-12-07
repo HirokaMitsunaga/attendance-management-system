@@ -36,64 +36,61 @@ const todayStatus: {
 
 export const AttendanceInfo = () => {
   return (
-    <div>
-      {' '}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            今日の勤怠ステータス
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">ステータス</span>
-            <StatusBadge status={todayStatus.status} />
-          </div>
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-primary" />
+          今日の勤怠ステータス
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">ステータス</span>
+          <StatusBadge status={todayStatus.status} />
+        </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">出勤時刻</p>
-              <p className="mt-1 text-2xl font-bold text-foreground">
-                {todayStatus.clockIn || '--:--'}
-              </p>
-            </div>
-            <div className="rounded-xl bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">退勤時刻</p>
-              <p className="mt-1 text-2xl font-bold text-foreground">
-                {todayStatus.clockOut || '--:--'}
-              </p>
-            </div>
-            <div className="rounded-xl bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">勤務時間</p>
-              <p className="mt-1 text-2xl font-bold text-foreground">
-                {todayStatus.workingHours || '--'}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl bg-muted/50 p-4">
+            <p className="text-sm text-muted-foreground">出勤時刻</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {todayStatus.clockIn || '--:--'}
+            </p>
           </div>
+          <div className="rounded-xl bg-muted/50 p-4">
+            <p className="text-sm text-muted-foreground">退勤時刻</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {todayStatus.clockOut || '--:--'}
+            </p>
+          </div>
+          <div className="rounded-xl bg-muted/50 p-4">
+            <p className="text-sm text-muted-foreground">勤務時間</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {todayStatus.workingHours || '--'}
+            </p>
+          </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              size="lg"
-              className="flex-1 gap-2"
-              disabled={todayStatus.status !== ATTENDANCE_STATUS.NOT_STARTED}
-            >
-              <Clock className="h-4 w-4" />
-              出勤
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              className="flex-1 gap-2"
-              disabled={todayStatus.status !== ATTENDANCE_STATUS.WORKING}
-            >
-              <Clock className="h-4 w-4" />
-              退勤
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-2">
+          <Button
+            size="lg"
+            className="flex-1 gap-2"
+            disabled={todayStatus.status !== ATTENDANCE_STATUS.NOT_STARTED}
+          >
+            <Clock className="h-4 w-4" />
+            出勤
+          </Button>
+          <Button
+            size="lg"
+            variant="secondary"
+            className="flex-1 gap-2"
+            disabled={todayStatus.status !== ATTENDANCE_STATUS.WORKING}
+          >
+            <Clock className="h-4 w-4" />
+            退勤
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

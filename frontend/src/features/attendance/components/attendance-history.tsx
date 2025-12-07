@@ -70,41 +70,38 @@ function RequestStatusBadge({ status }: { status: RequestStatus }) {
 
 export const AttendanceHistory = () => {
   return (
-    <div>
-      {' '}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>最近の勤怠履歴</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>日付</TableHead>
-                  <TableHead>出勤</TableHead>
-                  <TableHead>退勤</TableHead>
-                  <TableHead>勤務時間</TableHead>
-                  <TableHead>修正申請</TableHead>
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle>最近の勤怠履歴</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>日付</TableHead>
+                <TableHead>出勤</TableHead>
+                <TableHead>退勤</TableHead>
+                <TableHead>勤務時間</TableHead>
+                <TableHead>修正申請</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {attendanceHistory.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell className="font-medium">{record.date}</TableCell>
+                  <TableCell>{record.clockIn}</TableCell>
+                  <TableCell>{record.clockOut}</TableCell>
+                  <TableCell>{record.hours}</TableCell>
+                  <TableCell>
+                    <RequestStatusBadge status={record.requestStatus} />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendanceHistory.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell className="font-medium">{record.date}</TableCell>
-                    <TableCell>{record.clockIn}</TableCell>
-                    <TableCell>{record.clockOut}</TableCell>
-                    <TableCell>{record.hours}</TableCell>
-                    <TableCell>
-                      <RequestStatusBadge status={record.requestStatus} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
