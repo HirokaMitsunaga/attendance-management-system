@@ -57,9 +57,12 @@ const attendanceHistory = [
 function RequestStatusBadge({ status }: { status: RequestStatus }) {
   if (!status) return <EmptyValue />;
   const variants = {
-    申請中: 'bg-amber-500/15 text-amber-600 border-amber-500/20',
-    承認: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
-    却下: 'bg-destructive/15 text-destructive border-destructive/20',
+    [REQUEST_STATUS.PENDING]:
+      'bg-amber-500/15 text-amber-600 border-amber-500/20',
+    [REQUEST_STATUS.APPROVED]:
+      'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
+    [REQUEST_STATUS.REJECTED]:
+      'bg-destructive/15 text-destructive border-destructive/20',
   };
   return (
     <Badge variant="outline" className={`${variants[status]} font-medium`}>
