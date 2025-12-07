@@ -2,7 +2,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
-import React from 'react';
 
 function StatusBadge({ status }: { status: '未出勤' | '勤務中' | '退勤済' }) {
   const variants = {
