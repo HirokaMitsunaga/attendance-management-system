@@ -2,13 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { REQUEST_STATUS } from '../types/request-status';
-import { RequestStatusBadge } from './request-status-badge';
+import { AttendanceRow } from './attendance-row';
 
 const attendanceHistory = [
   {
@@ -52,6 +51,13 @@ const attendanceHistory = [
     requestStatus: REQUEST_STATUS.REJECTED,
   },
 ];
+const columns = [
+  { header: '日付', accessor: 'date' },
+  { header: '出勤', accessor: 'clockIn' },
+  { header: '退勤', accessor: 'clockOut' },
+  { header: '勤務時間', accessor: 'hours' },
+  { header: '修正ステータス', accessor: 'requestStatus' },
+];
 
 export const AttendanceHistory = () => {
   return (
@@ -64,24 +70,14 @@ export const AttendanceHistory = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>日付</TableHead>
-                <TableHead>出勤</TableHead>
-                <TableHead>退勤</TableHead>
-                <TableHead>勤務時間</TableHead>
-                <TableHead>修正申請</TableHead>
+                {columns.map((col) => (
+                  <TableHead key={col.accessor}>{col.header}</TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               {attendanceHistory.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell className="font-medium">{record.date}</TableCell>
-                  <TableCell>{record.clockIn}</TableCell>
-                  <TableCell>{record.clockOut}</TableCell>
-                  <TableCell>{record.hours}</TableCell>
-                  <TableCell>
-                    <RequestStatusBadge status={record.requestStatus} />
-                  </TableCell>
-                </TableRow>
+                <AttendanceRow key={record.id} record={record} />
               ))}
             </TableBody>
           </Table>
