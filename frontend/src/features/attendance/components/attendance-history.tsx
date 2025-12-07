@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { REQUEST_STATUS, RequestStatus } from '../types/request-status';
+import { EmptyValue } from '@/components/ui/empty-value';
 
 const attendanceHistory = [
   {
@@ -49,7 +50,7 @@ const attendanceHistory = [
 ];
 
 function RequestStatusBadge({ status }: { status: RequestStatus }) {
-  if (!status) return <span className="text-muted-foreground">-</span>;
+  if (!status) return <EmptyValue />;
   const variants = {
     申請中: 'bg-amber-500/15 text-amber-600 border-amber-500/20',
     承認: 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20',
