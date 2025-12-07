@@ -1,27 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
-import {
-  ATTENDANCE_STATUS,
-  AttendanceStatus,
-} from '../types/attendance-status';
+import { ATTENDANCE_STATUS } from '../types/attendance-status';
 import { StatCard } from './stat-card';
 import { AttendanceStatusBadge } from './attendance-status-badge';
-
-// Mock data
-const todayStatus: {
-  clockIn: string | null;
-  clockOut: string | null;
-  workingHours: string;
-  status: AttendanceStatus;
-} = {
-  clockIn: '09:02',
-  clockOut: '',
-  workingHours: '5時間32分',
-  status: ATTENDANCE_STATUS.WORKING,
-};
+import { useTodayAttendance } from '../hooks/useTodayAttendance';
 
 export const AttendanceInfo = () => {
+  const todayStatus = useTodayAttendance();
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -33,21 +19,24 @@ export const AttendanceInfo = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">ステータス</span>
-          <AttendanceStatusBadge status={todayStatus.status} />
+          <AttendanceStatusBadge status={todayStatus.todayAttendance.status} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
             label="出勤時刻"
-            value={todayStatus.clockIn}
+            value={todayStatus.todayAttendance.clockIn}
             placeholder="--:--"
           />
           <StatCard
             label="退勤時刻"
-            value={todayStatus.clockOut}
+            value={todayStatus.todayAttendance.clockOut}
             placeholder=" --:-- "
           />
-          <StatCard label="勤務時間" value={todayStatus.workingHours} />
+          <StatCard
+            label="勤務時間"
+            value={todayStatus.todayAttendance.workingHours}
+          />
         </div>
 
         {/* Action Buttons */}
@@ -55,7 +44,10 @@ export const AttendanceInfo = () => {
           <Button
             size="lg"
             className="flex-1 gap-2"
-            disabled={todayStatus.status !== ATTENDANCE_STATUS.NOT_STARTED}
+            disabled={
+              todayStatus.todayAttendance.status !==
+              ATTENDANCE_STATUS.NOT_STARTED
+            }
           >
             <Clock className="h-4 w-4" />
             出勤
@@ -64,7 +56,9 @@ export const AttendanceInfo = () => {
             size="lg"
             variant="secondary"
             className="flex-1 gap-2"
-            disabled={todayStatus.status !== ATTENDANCE_STATUS.WORKING}
+            disabled={
+              todayStatus.todayAttendance.status !== ATTENDANCE_STATUS.WORKING
+            }
           >
             <Clock className="h-4 w-4" />
             退勤
