@@ -13,6 +13,7 @@ import { EmptyValue } from '@/components/ui/empty-value';
 
 const attendanceHistory = [
   {
+    id: '01JGXM8K2PQRSTUVWXYZ123456',
     date: '2025/01/05',
     clockIn: '09:00',
     clockOut: '18:05',
@@ -20,6 +21,7 @@ const attendanceHistory = [
     requestStatus: null,
   },
   {
+    id: '01JGXM7N3QABCDEFGHIJK78901',
     date: '2025/01/04',
     clockIn: '09:15',
     clockOut: '18:30',
@@ -27,6 +29,7 @@ const attendanceHistory = [
     requestStatus: REQUEST_STATUS.APPROVED,
   },
   {
+    id: '01JGXM6P4RLMNOPQRSTUVWX234',
     date: '2025/01/03',
     clockIn: '08:55',
     clockOut: '17:50',
@@ -34,6 +37,7 @@ const attendanceHistory = [
     requestStatus: null,
   },
   {
+    id: '01JGXM5Q5SYZABCDEFGHIJK567',
     date: '2025/01/02',
     clockIn: '09:30',
     clockOut: '18:00',
@@ -41,6 +45,7 @@ const attendanceHistory = [
     requestStatus: REQUEST_STATUS.PENDING,
   },
   {
+    id: '01JGXM4R6TKLMNOPQRSTUVWX890',
     date: '2025/01/01',
     clockIn: '09:00',
     clockOut: '18:00',
@@ -85,7 +90,7 @@ export const AttendanceHistory = () => {
               </TableHeader>
               <TableBody>
                 {attendanceHistory.map((record) => (
-                  <TableRow key={record.date}>
+                  <TableRow key={record.id}>
                     <TableCell className="font-medium">{record.date}</TableCell>
                     <TableCell>{record.clockIn}</TableCell>
                     <TableCell>{record.clockOut}</TableCell>
