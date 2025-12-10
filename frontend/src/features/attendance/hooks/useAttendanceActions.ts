@@ -6,6 +6,7 @@ import type {
   WorkingStatus,
   FinishedStatus,
 } from '../types/todday-status';
+import { calcWorkingHours } from '@/utils/calcWorkingHours';
 
 export const useAttendanceActions = () => {
   const { mutate } = useSWRConfig();
@@ -42,11 +43,10 @@ export const useAttendanceActions = () => {
         if (!currentData || currentData.clockIn === null) {
           throw new Error('出勤時刻が記録されていません');
         }
-
         return {
           clockIn: currentData.clockIn,
           clockOut: clockOutTime,
-          workingHours: currentData.workingHours,
+          workingHours: calcWorkingHours(currentData.clockIn, clockOutTime),
           status: ATTENDANCE_STATUS.FINISHED,
         };
       },
