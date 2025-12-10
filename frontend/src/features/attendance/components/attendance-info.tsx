@@ -8,6 +8,7 @@ import { AttendanceStatusBadge } from './attendance-status-badge';
 import { useTodayAttendance } from '../hooks/useTodayAttendance';
 import { useAttendanceActions } from '../hooks/useAttendanceActions';
 import { AttendanceInfoCard } from './attendance-info-card';
+import { Loading } from '@/components/ui/Loading';
 
 export const AttendanceInfo = () => {
   const { handleClockIn, handleClockOut } = useAttendanceActions();
@@ -25,7 +26,7 @@ export const AttendanceInfo = () => {
   if (isLoading) {
     return (
       <AttendanceInfoCard>
-        <p className="text-muted-foreground">読み込み中...</p>
+        <Loading />
       </AttendanceInfoCard>
     );
   }
