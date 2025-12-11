@@ -14,8 +14,8 @@ export function calcWorkingHours(clockIn: string, clockOut: string): string {
   const totalInMinutes = inHours * 60 + inMinutes;
   let totalOutMinutes = outHours * 60 + outMinutes;
 
-  // 深夜勤務対応（退勤時刻が出勤時刻以前の場合は翌日とみなす）
-  if (totalOutMinutes <= totalInMinutes) {
+  // 深夜勤務対応（退勤時刻が出勤時刻より前の場合は翌日とみなす）
+  if (totalOutMinutes < totalInMinutes) {
     totalOutMinutes += 24 * 60;
   }
 
