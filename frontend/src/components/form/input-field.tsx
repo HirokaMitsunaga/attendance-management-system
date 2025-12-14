@@ -28,7 +28,7 @@ export const InputField = ({
   return (
     <div className="space-y-2">
       <Label htmlFor={id} className="flex items-center gap-2">
-        {Icon && <Icon className="h-4 w-4" />}
+        <Icon className="h-4 w-4" />
         {label}
       </Label>
       <Input
