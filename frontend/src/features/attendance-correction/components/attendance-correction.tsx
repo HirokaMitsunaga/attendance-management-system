@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AttendanceCorrectionHistory } from './attendance-correction-history';
+import { AttendanceCorrectionHistory } from '@/features/attendance-correction/components/attendance-correction-history';
 import {
   ATTENDANCE_CORRECTION_TYPE,
   AttendanceCorrectionType,
   isValidCorrectionType,
-} from '../types/attendance-correction-type';
-import { InputField } from '../../../components/form/input-field';
-import { SelectField } from '../../../components/form/select-field';
+} from '@/features/attendance-correction/types/attendance-correction-type';
+import { InputField } from '@/components/form/input-field';
+import { SelectField } from '@/components/form/select-field';
 import toast from 'react-hot-toast';
 import { PageHeader } from '@/components/layout/page-header';
 
