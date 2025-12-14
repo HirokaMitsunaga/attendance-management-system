@@ -30,10 +30,10 @@ export const AttendanceCorrectionHistory = () => {
   return (
     <div className="space-y-4">
       <Card className="mt-6 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-lg">申請履歴</CardTitle>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle className="text-lg">申請履歴</CardTitle>
-          </CardHeader>
           {attendanceCorrectionHistory.map((request) => (
             <AttendanceCorrectionHistoryCard key={request.id} {...request} />
           ))}
