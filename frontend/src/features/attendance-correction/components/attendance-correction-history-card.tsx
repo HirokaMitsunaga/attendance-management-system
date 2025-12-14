@@ -1,9 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestStatus } from '@/features/attendance/types/request-status';
 import { RequestStatusBadge } from '@/features/attendance/components/request-status-badge';
 
 type attendanceCorrectionHistoryCardProps = {
-  id: string;
   date: string;
   time: string;
   status: RequestStatus;
@@ -11,17 +9,13 @@ type attendanceCorrectionHistoryCardProps = {
 };
 
 export default function AttendanceCorrectionHistoryCard({
-  id,
   date,
   time,
   status,
   reason,
 }: attendanceCorrectionHistoryCardProps) {
   return (
-    <div
-      key={id}
-      className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between mt-3"
-    >
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between mt-3">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <p className="font-semibold text-foreground">{date}</p>
