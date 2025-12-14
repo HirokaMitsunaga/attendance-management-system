@@ -12,8 +12,8 @@ import {
   AttendanceCorrectionType,
   isValidCorrectionType,
 } from '../types/attendance-correction-type';
-import { InputField } from './input-field';
-import { SelectField } from './select-field';
+import { InputField } from '../../../components/form/input-field';
+import { SelectField } from '../../../components/form/select-field';
 import toast from 'react-hot-toast';
 import { PageHeader } from '@/components/layout/page-header';
 
