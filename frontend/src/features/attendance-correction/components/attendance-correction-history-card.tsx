@@ -18,27 +18,18 @@ export default function AttendanceCorrectionHistoryCard({
   reason,
 }: attendanceCorrectionHistoryCardProps) {
   return (
-    <Card className="mt-6 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-lg">申請履歴</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div
-            key={id}
-            className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-foreground">{date}</p>
-                <RequestStatusBadge status={status} />
-              </div>
-              <p className="text-sm text-muted-foreground">{time}</p>
-              <p className="text-sm text-muted-foreground">{reason}</p>
-            </div>
-          </div>
+    <div
+      key={id}
+      className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between mt-3"
+    >
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <p className="font-semibold text-foreground">{date}</p>
+          <RequestStatusBadge status={status} />
         </div>
-      </CardContent>
-    </Card>
+        <p className="text-sm text-muted-foreground">{time}</p>
+        <p className="text-sm text-muted-foreground">{reason}</p>
+      </div>
+    </div>
   );
 }

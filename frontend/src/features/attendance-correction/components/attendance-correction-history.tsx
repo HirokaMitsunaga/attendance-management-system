@@ -1,5 +1,6 @@
 import { REQUEST_STATUS } from '@/features/attendance/types/request-status';
 import AttendanceCorrectionHistoryCard from './attendance-correction-history-card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const attendanceCorrectionHistory = [
   {
@@ -28,9 +29,16 @@ const attendanceCorrectionHistory = [
 export default function AttendanceCorrectionHistory() {
   return (
     <div className="space-y-4">
-      {attendanceCorrectionHistory.map((request) => (
-        <AttendanceCorrectionHistoryCard key={request.id} {...request} />
-      ))}
+      <Card className="mt-6 shadow-lg">
+        <CardContent>
+          <CardHeader>
+            <CardTitle className="text-lg">申請履歴</CardTitle>
+          </CardHeader>
+          {attendanceCorrectionHistory.map((request) => (
+            <AttendanceCorrectionHistoryCard key={request.id} {...request} />
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }
