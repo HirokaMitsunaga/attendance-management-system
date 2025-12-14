@@ -1,7 +1,4 @@
 'use client';
-
-import type React from 'react';
-
 import { useState } from 'react';
 import { ArrowLeft, Calendar, Clock, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -17,6 +14,7 @@ import {
 } from '../types/attendance-correction-type';
 import { InputField } from './input-field';
 import { SelectField } from './select-field';
+import toast from 'react-hot-toast';
 
 export const AttendanceCorrection = () => {
   const [date, setDate] = useState('');
@@ -43,7 +41,12 @@ export const AttendanceCorrection = () => {
   //Selectボタンからだとundefinedの可能性があるため、チェックする
   const handleCorrectionTypeChange = (value: string) => {
     if (!isValidCorrectionType(value)) {
-      throw new Error(`不正な補正タイプ: ${value}`);
+      // 開発者向け: コンソールにエラーを記録
+      console.error(`不正な修正項目が選択されました: ${value}`);
+      // ユーザー向け: 画面上で通知
+      toast.error(`不正な修正項目が選択されました: ${value}`);
+      // 不正な値で状態を更新しない
+      return;
     }
     setCorrectionType(value);
   };
