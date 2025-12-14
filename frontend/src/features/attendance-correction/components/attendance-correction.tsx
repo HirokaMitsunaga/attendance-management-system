@@ -68,7 +68,7 @@ export const AttendanceCorrection = () => {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -113,6 +113,7 @@ export const AttendanceCorrection = () => {
                     onChange={setClockIn}
                     required
                     icon={Clock}
+                    className="max-w-xs"
                   />
                 )}
                 {correctionType ===
