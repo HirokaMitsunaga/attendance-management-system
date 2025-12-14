@@ -1,4 +1,6 @@
 import { User, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +11,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export const Header = () => {
+type PageHeaderProps = {
+  title: string;
+  href?: string;
+};
+
+export const PageHeader = ({ title, href }: PageHeaderProps) => {
   return (
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-bold text-foreground sm:text-2xl">
-          勤怠ダッシュボード
+        {href && (
+          <Link href={href}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+        )}
+        <h1 className="flex-1 text-left text-xl font-bold text-foreground sm:text-2xl">
+          {title}
         </h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

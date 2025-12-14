@@ -8,7 +8,7 @@ type ShortcutItem = {
   icon: LucideIcon;
   title: string;
   description: string;
-  href?: string; // 将来的な遷移先
+  href: string;
 };
 
 const shortcutItems: ShortcutItem[] = [
@@ -48,6 +48,7 @@ export const AttendanceShortcut = () => {
             icon={item.icon}
             title={item.title}
             description={item.description}
+            href={item.href}
           />
         ))}
       </div>
