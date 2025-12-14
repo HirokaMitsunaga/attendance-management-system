@@ -8,22 +8,22 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import AttendanceCorrectionHistory from './attendance-correction-history';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  ATTENDANCE_CORRECTION_TYPE,
+  AttendanceCorrectionType,
+  isValidCorrectionType,
+} from '../types/attendance-correction-type';
+import { InputField } from './input-field';
+import { SelectField } from './select-field';
 
 export default function AttendanceCorrection() {
   const [date, setDate] = useState('');
-  const [correctionType, setCorrectionType] = useState<
-    'clockIn' | 'clockOut' | 'both'
-  >('both');
+  const [correctionType, setCorrectionType] =
+    useState<AttendanceCorrectionType>(
+      ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.value,
+    );
   const [clockIn, setClockIn] = useState('');
   const [clockOut, setClockOut] = useState('');
   const [reason, setReason] = useState('');
@@ -38,6 +38,14 @@ export default function AttendanceCorrection() {
       reason,
     });
     // ここで申請処理を実装
+  };
+
+  //Selectボタンからだとundefinedの可能性があるため、チェックする
+  const handleCorrectionTypeChange = (value: string) => {
+    if (!isValidCorrectionType(value)) {
+      throw new Error(`不正な補正タイプ: ${value}`);
+    }
+    setCorrectionType(value);
   };
 
   return (
@@ -70,91 +78,52 @@ export default function AttendanceCorrection() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Date Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="date" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  対象日
-                </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                  className="max-w-xs"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="correctionType"
-                  className="flex items-center gap-2"
-                >
-                  <Clock className="h-4 w-4" />
-                  修正項目
-                </Label>
-                <Select
-                  value={correctionType}
-                  onValueChange={(value) =>
-                    setCorrectionType(value as 'clockIn' | 'clockOut' | 'both')
-                  }
-                >
-                  <SelectTrigger id="correctionType" className="max-w-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clockIn">出勤時刻のみ</SelectItem>
-                    <SelectItem value="clockOut">退勤時刻のみ</SelectItem>
-                    <SelectItem value="both">出勤・退勤時刻の両方</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <InputField
+                id="date"
+                label="対象日"
+                type="date"
+                value={date}
+                onChange={setDate}
+                required
+                icon={Calendar}
+                className="max-w-xs"
+              />
+              <SelectField
+                id="correctionType"
+                label="修正項目"
+                value={correctionType}
+                onChange={handleCorrectionTypeChange}
+                options={Object.values(ATTENDANCE_CORRECTION_TYPE)}
+                icon={Clock}
+                className="max-w-xs"
+              />
 
               {/* Time Inputs */}
               <div className="grid gap-6 sm:grid-cols-2">
-                {(correctionType === 'clockIn' ||
-                  correctionType === 'both') && (
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="clockIn"
-                      className="flex items-center gap-2"
-                    >
-                      <Clock className="h-4 w-4" />
-                      修正後の出勤時刻
-                    </Label>
-                    <Input
-                      id="clockIn"
-                      type="time"
-                      value={clockIn}
-                      onChange={(e) => setClockIn(e.target.value)}
-                      required
-                    />
-                    <p className="text-sm text-muted-foreground">現在: 09:02</p>
-                  </div>
+                {correctionType ===
+                  ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.value && (
+                  <InputField
+                    id={ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.value}
+                    label={`修正後の${ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.label}`}
+                    type="time"
+                    value={clockIn}
+                    onChange={setClockIn}
+                    required
+                    icon={Clock}
+                  />
                 )}
-
-                {(correctionType === 'clockOut' ||
-                  correctionType === 'both') && (
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="clockOut"
-                      className="flex items-center gap-2"
-                    >
-                      <Clock className="h-4 w-4" />
-                      修正後の退勤時刻
-                    </Label>
-                    <Input
-                      id="clockOut"
-                      type="time"
-                      value={clockOut}
-                      onChange={(e) => setClockOut(e.target.value)}
-                      required
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      現在: 未打刻
-                    </p>
-                  </div>
+                {correctionType ===
+                  ATTENDANCE_CORRECTION_TYPE.CLOCK_OUT.value && (
+                  <InputField
+                    id={ATTENDANCE_CORRECTION_TYPE.CLOCK_OUT.value}
+                    label={`修正後の${ATTENDANCE_CORRECTION_TYPE.CLOCK_OUT.label}`}
+                    type="time"
+                    value={clockOut}
+                    onChange={setClockOut}
+                    required
+                    currentValue="未打刻"
+                    icon={Clock}
+                  />
                 )}
               </div>
 
@@ -173,19 +142,6 @@ export default function AttendanceCorrection() {
                 <p className="text-sm text-muted-foreground">
                   承認者が確認するため、具体的な理由を記載してください。
                 </p>
-              </div>
-
-              {/* Info Box */}
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                <h3 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-                  <FileText className="h-4 w-4" />
-                  申請について
-                </h3>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>・申請後、承認者による承認が必要です</li>
-                  <li>・承認されるまで勤怠データは更新されません</li>
-                  <li>・申請状況はダッシュボードで確認できます</li>
-                </ul>
               </div>
 
               {/* Submit Buttons */}
@@ -207,68 +163,7 @@ export default function AttendanceCorrection() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Recent Requests */}
-        <Card className="mt-6 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg">申請履歴</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                {
-                  date: '2025/01/04',
-                  time: '09:15 → 09:00',
-                  status: '承認' as const,
-                  reason: '電車の遅延により遅刻',
-                },
-                {
-                  date: '2025/01/02',
-                  time: '09:30 → 09:00',
-                  status: '申請中' as const,
-                  reason: '打刻忘れ',
-                },
-                {
-                  date: '2025/01/01',
-                  time: '18:00 → 19:30',
-                  status: '却下' as const,
-                  reason: '理由が不明確',
-                },
-              ].map((request, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">
-                        {request.date}
-                      </p>
-                      <Badge
-                        variant="outline"
-                        className={
-                          request.status === '承認'
-                            ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20'
-                            : request.status === '申請中'
-                              ? 'bg-amber-500/15 text-amber-600 border-amber-500/20'
-                              : 'bg-destructive/15 text-destructive border-destructive/20'
-                        }
-                      >
-                        {request.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {request.time}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {request.reason}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <AttendanceCorrectionHistory />
       </main>
     </div>
   );
