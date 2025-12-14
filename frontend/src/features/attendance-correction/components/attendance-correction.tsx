@@ -15,6 +15,7 @@ import {
 import { InputField } from './input-field';
 import { SelectField } from './select-field';
 import toast from 'react-hot-toast';
+import { PageHeader } from '@/components/layout/page-header';
 
 export const AttendanceCorrection = () => {
   const [date, setDate] = useState('');
@@ -53,20 +54,7 @@ export const AttendanceCorrection = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">
-            勤怠修正申請
-          </h1>
-        </div>
-      </header>
-
+      <PageHeader title="勤怠修正申請" href="/" />
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Card className="shadow-lg">
