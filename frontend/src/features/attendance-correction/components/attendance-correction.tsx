@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import AttendanceCorrectionHistory from './attendance-correction-history';
+import { AttendanceCorrectionHistory } from './attendance-correction-history';
 import {
   ATTENDANCE_CORRECTION_TYPE,
   AttendanceCorrectionType,
@@ -18,7 +18,7 @@ import {
 import { InputField } from './input-field';
 import { SelectField } from './select-field';
 
-export default function AttendanceCorrection() {
+export const AttendanceCorrection = () => {
   const [date, setDate] = useState('');
   const [correctionType, setCorrectionType] =
     useState<AttendanceCorrectionType>(
@@ -167,4 +167,4 @@ export default function AttendanceCorrection() {
       </main>
     </div>
   );
-}
+};

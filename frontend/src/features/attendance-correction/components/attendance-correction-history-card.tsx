@@ -1,19 +1,19 @@
 import { RequestStatus } from '@/features/attendance/types/request-status';
 import { RequestStatusBadge } from '@/features/attendance/components/request-status-badge';
 
-type attendanceCorrectionHistoryCardProps = {
+type AttendanceCorrectionHistoryCardProps = {
   date: string;
   time: string;
   status: RequestStatus;
   reason: string;
 };
 
-export default function AttendanceCorrectionHistoryCard({
+export const AttendanceCorrectionHistoryCard = ({
   date,
   time,
   status,
   reason,
-}: attendanceCorrectionHistoryCardProps) {
+}: AttendanceCorrectionHistoryCardProps) => {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between mt-3">
       <div className="space-y-1">
@@ -26,4 +26,4 @@ export default function AttendanceCorrectionHistoryCard({
       </div>
     </div>
   );
-}
+};

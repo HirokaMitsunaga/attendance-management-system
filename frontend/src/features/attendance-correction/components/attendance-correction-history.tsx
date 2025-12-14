@@ -1,5 +1,5 @@
 import { REQUEST_STATUS } from '@/features/attendance/types/request-status';
-import AttendanceCorrectionHistoryCard from './attendance-correction-history-card';
+import { AttendanceCorrectionHistoryCard } from './attendance-correction-history-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const attendanceCorrectionHistory = [
@@ -26,7 +26,7 @@ const attendanceCorrectionHistory = [
   },
 ];
 
-export default function AttendanceCorrectionHistory() {
+export const AttendanceCorrectionHistory = () => {
   return (
     <div className="space-y-4">
       <Card className="mt-6 shadow-lg">
@@ -41,4 +41,4 @@ export default function AttendanceCorrectionHistory() {
       </Card>
     </div>
   );
-}
+};
