@@ -1,44 +1,45 @@
 import type { LucideIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import {
+  useFormContext,
+  useFormState,
+  type FieldPath,
+  type FieldValues,
+} from 'react-hook-form';
 
-type InputFieldProps = {
-  id: string;
+type InputFieldProps<TFieldValues extends FieldValues> = {
+  name: FieldPath<TFieldValues>;
   label: string;
   type: 'time' | 'date' | 'text';
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
   currentValue?: string; // 現在の値（「未打刻」や実際の時刻）を表示する場合
   icon: LucideIcon;
   className?: string;
 };
 
-export const InputField = ({
-  id,
+export const InputField = <TFieldValues extends FieldValues>({
+  name,
   label,
   type,
-  value,
-  onChange,
-  required = false,
   currentValue,
   icon: Icon,
   className,
-}: InputFieldProps) => {
+}: InputFieldProps<TFieldValues>) => {
+  const { register, control } = useFormContext<TFieldValues>();
+  // FormProviderで提供されたフォームの状態からエラーを取得するため、useFormStateを使う
+  // （formState.errorsを直接参照すると変更検知されない場合があるため）
+  const { errors } = useFormState({ control });
+
+  const fieldError = errors[name];
+  const errorMessage = fieldError?.message as string | undefined;
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="flex items-center gap-2">
+      <Label htmlFor={name} className="flex items-center gap-2">
         <Icon className="h-4 w-4" />
         {label}
       </Label>
-      <Input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        className={className}
-      />
+      <Input id={name} type={type} className={className} {...register(name)} />
+      {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
       {currentValue && (
         <p className="text-sm text-muted-foreground">現在: {currentValue}</p>
       )}
