@@ -309,7 +309,7 @@ export const MyForm = () => {
 #### ルール
 
 - **`useForm`と`FormProvider`を直接使用**: コンポーネント内で`useForm`を呼び出し、`FormProvider`でフォームコンテキストを提供する
-- **`mode: "onSubmit"`と`reValidateMode: "onChange"`を設定**: 初回バリデーションは送信時、再バリデーションは変更時に実行
+- **`mode: "onBlur"`と`reValidateMode: "onChange"`を設定**: 初回バリデーションは入力後、再バリデーションは変更時に実行
 - **`useFormState`でエラーを取得**: `FormField`、`TextField`、`SelectField`、`TextareaField`では`useFormState({ control })`を使用してエラーを取得する（`formState.errors`を直接使用すると変更検知されない場合がある）
 - **`handleSubmit`の第 2 引数は不要**: RHF が自動的にバリデーションエラーを`formState.errors`に設定するため、エラーハンドリング用の第 2 引数コールバックは不要
 - **エラーメッセージは自動表示**: `FormField`コンポーネントが自動的にエラーメッセージを表示
