@@ -276,7 +276,7 @@ export const MyForm = () => {
   const methods = useForm<FormData>({
     resolver: zodResolver(FormDataSchema),
     defaultValues: { name: '', email: '', role: '' },
-    mode: 'onSubmit', // 送信時にバリデーション
+    mode: 'onBlur', // 入力後にバリデーション
     reValidateMode: 'onChange', // 再バリデーションは変更時
   });
 
