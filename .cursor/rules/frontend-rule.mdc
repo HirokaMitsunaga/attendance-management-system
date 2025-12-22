@@ -274,6 +274,7 @@ type FormData = {
 
 export const MyForm = () => {
   const methods = useForm<FormData>({
+    resolver: zodResolver(FormDataSchema),
     defaultValues: { name: '', email: '', role: '' },
     mode: 'onSubmit', // 送信時にバリデーション
     reValidateMode: 'onChange', // 再バリデーションは変更時
@@ -288,22 +289,9 @@ export const MyForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit} noValidate>
-        <TextField
-          name="name"
-          label="名前"
-          rules={{ required: '名前は必須です' }}
-        />
-        <TextField
-          name="email"
-          label="メールアドレス"
-          rules={{ required: 'メールアドレスは必須です' }}
-        />
-        <SelectField
-          name="role"
-          label="権限"
-          options={roleOptions}
-          rules={{ required: '権限は必須です' }}
-        />
+        <TextField name="name" label="名前" />
+        <TextField name="email" label="メールアドレス" />
+        <SelectField name="role" label="権限" options={roleOptions} />
         <Button type="submit">送信</Button>
       </form>
     </FormProvider>
@@ -324,7 +312,6 @@ export const MyForm = () => {
 - **`mode: "onSubmit"`と`reValidateMode: "onChange"`を設定**: 初回バリデーションは送信時、再バリデーションは変更時に実行
 - **`useFormState`でエラーを取得**: `FormField`、`TextField`、`SelectField`、`TextareaField`では`useFormState({ control })`を使用してエラーを取得する（`formState.errors`を直接使用すると変更検知されない場合がある）
 - **`handleSubmit`の第 2 引数は不要**: RHF が自動的にバリデーションエラーを`formState.errors`に設定するため、エラーハンドリング用の第 2 引数コールバックは不要
-- **バリデーションは`rules`プロパティで指定**: 各フィールドコンポーネントの`rules`プロパティでバリデーションルールを指定
 - **エラーメッセージは自動表示**: `FormField`コンポーネントが自動的にエラーメッセージを表示
 - **サーバーサイドのバリデーションエラーは`setError`で設定**: API から返されたフィールド固有のエラーは`methods.setError`で設定し、RHF のエラー表示機構を利用する
 - **`Input`コンポーネントはシンプルに**: label や error 表示は含めず、純粋な input 要素のみを提供
@@ -359,13 +346,13 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { Input } from '../ui/Input';
 import { FormField } from './FormField';
 
-export const TextField = ({ name, label, rules, ...props }) => {
-  const { register, control } = useFormContext();
+export const TextField = ({ name, label, ...props }) => {
+  const { control } = useFormContext();
   const { errors } = useFormState({ control }); // useFormStateで確実にエラーを検知
 
   return (
     <FormField name={name} label={label}>
-      <Input {...register(name, rules)} error={!!errors[name]} {...props} />
+      <Input error={!!errors[name]} {...props} />
     </FormField>
   );
 };
