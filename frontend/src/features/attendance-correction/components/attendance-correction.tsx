@@ -16,6 +16,7 @@ import {
   AttendanceCorrectionSchema,
 } from '../schema/attendance-correction-schema';
 import { PageHeader } from '@/components/layout/page-header';
+import { TextField } from '@/components/form/text-field';
 
 export const AttendanceCorrection = () => {
   const methods = useForm<AttendanceCorrectionFormData>({
@@ -97,13 +98,12 @@ export const AttendanceCorrection = () => {
 
                 {/* Reason */}
                 <div className="space-y-2">
-                  <Label htmlFor="reason">修正理由</Label>
-                  <Textarea
-                    id="reason"
+                  <TextField
+                    name="reason"
+                    label="修正理由"
                     placeholder="修正が必要な理由を入力してください（例：打刻忘れ、システムエラー等）"
                     rows={4}
                     className="resize-none"
-                    {...methods.register('reason')}
                   />
                   <p className="text-sm text-muted-foreground">
                     承認者が確認するため、具体的な理由を記載してください。
