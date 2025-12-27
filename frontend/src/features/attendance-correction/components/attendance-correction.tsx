@@ -5,8 +5,6 @@ import { Calendar, Clock, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { AttendanceCorrectionHistory } from '@/features/attendance-correction/components/attendance-correction-history';
 import { ATTENDANCE_CORRECTION_TYPE } from '@/features/attendance-correction/types/attendance-correction-type';
 import { InputField } from '@/components/form/input-field';
@@ -17,6 +15,7 @@ import {
 } from '../schema/attendance-correction-schema';
 import { PageHeader } from '@/components/layout/page-header';
 import { TextField } from '@/components/form/text-field';
+import { useAttendanceCorrectionActions } from '../hooks/useAttendanceCorrectionActions';
 
 export const AttendanceCorrection = () => {
   const methods = useForm<AttendanceCorrectionFormData>({
@@ -31,9 +30,13 @@ export const AttendanceCorrection = () => {
   const { watch } = methods;
   const correctionType = watch('correctionType');
 
-  const onSubmit = () => {
-    console.log('勤怠修正ボタンが押されました。');
-    // ここで申請処理を実装
+  const { handleFormSubmit } = useAttendanceCorrectionActions();
+
+  const onSubmit = async (data: AttendanceCorrectionFormData) => {
+    const success = await handleFormSubmit(data, methods.setError);
+    if (success) {
+      methods.reset();
+    }
   };
 
   return (
