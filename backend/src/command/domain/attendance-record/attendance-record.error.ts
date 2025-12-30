@@ -4,7 +4,7 @@ import { AttendanceStatus } from './attendance-status';
 /**
  * 勤怠記録の状態が不正で操作できない場合のエラー
  */
-export class InvalidWorkRecordStateError extends DomainError {
+export class InvalidAttendanceRecordStateError extends DomainError {
   constructor({
     operation,
     currentStatus,
@@ -13,6 +13,6 @@ export class InvalidWorkRecordStateError extends DomainError {
     currentStatus: AttendanceStatus;
   }) {
     super(`${operation}ができません。現在のステータス: ${currentStatus}`);
-    this.name = 'InvalidWorkRecordStateError';
+    this.name = 'InvalidAttendanceRecordStateError';
   }
 }

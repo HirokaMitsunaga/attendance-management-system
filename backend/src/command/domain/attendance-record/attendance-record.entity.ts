@@ -2,17 +2,17 @@ import { ATTENDANCE_STATUS, AttendanceStatus } from './attendance-status';
 import { EntityId } from '../entity-id.vo';
 import { PUNCH_TYPE, PunchType } from './punch/punch-type';
 import { PunchVO } from './punch/punch.vo';
-import { InvalidWorkRecordStateError } from './work-record.eintity.error';
+import { InvalidAttendanceRecordStateError } from './attendance-record.error';
 
-type WorkRecordParams = {
+type AttendanceRecordParams = {
   id: EntityId;
   userId: EntityId;
   workDate: Date;
   punches: PunchVO[];
 };
 
-// エンティティ（集約ルート）：WorkRecord
-export class WorkRecord {
+// エンティティ（集約ルート）：AttendanceRecord
+export class AttendanceRecord {
   // --- Identity ---
   private readonly id: EntityId;
 
@@ -23,7 +23,12 @@ export class WorkRecord {
   // 修正申請は別集約なので、ここは事実ログのまま
   private punches: PunchVO[];
 
-  private constructor({ id, userId, workDate, punches }: WorkRecordParams) {
+  private constructor({
+    id,
+    userId,
+    workDate,
+    punches,
+  }: AttendanceRecordParams) {
     this.id = id;
     this.userId = userId;
     this.workDate = workDate;
@@ -34,8 +39,8 @@ export class WorkRecord {
     userId,
     workDate,
     punches,
-  }: Omit<WorkRecordParams, 'id'>) {
-    return new WorkRecord({
+  }: Omit<AttendanceRecordParams, 'id'>) {
+    return new AttendanceRecord({
       id: EntityId.generate(),
       userId,
       workDate,
@@ -48,8 +53,8 @@ export class WorkRecord {
     userId,
     workDate,
     punches,
-  }: WorkRecordParams) {
-    return new WorkRecord({
+  }: AttendanceRecordParams) {
+    return new AttendanceRecord({
       id,
       userId,
       workDate,
@@ -60,7 +65,7 @@ export class WorkRecord {
   public clockIn({ occurredAt }: { occurredAt: Date }) {
     const currentStatus = this.latestWorkStatus();
     if (!this.canClockIn()) {
-      throw new InvalidWorkRecordStateError({
+      throw new InvalidAttendanceRecordStateError({
         operation: '出勤',
         currentStatus,
       });
@@ -76,7 +81,7 @@ export class WorkRecord {
   public clockOut({ occurredAt }: { occurredAt: Date }) {
     const currentStatus = this.latestWorkStatus();
     if (!this.canClockOut()) {
-      throw new InvalidWorkRecordStateError({
+      throw new InvalidAttendanceRecordStateError({
         operation: '退勤',
         currentStatus,
       });
@@ -92,7 +97,7 @@ export class WorkRecord {
   public breakStart({ occurredAt }: { occurredAt: Date }) {
     const currentStatus = this.latestWorkStatus();
     if (!this.canBreakStart()) {
-      throw new InvalidWorkRecordStateError({
+      throw new InvalidAttendanceRecordStateError({
         operation: '休憩の開始',
         currentStatus,
       });
@@ -107,7 +112,7 @@ export class WorkRecord {
   public breakEnd({ occurredAt }: { occurredAt: Date }) {
     const currentStatus = this.latestWorkStatus();
     if (!this.canBreakEnd()) {
-      throw new InvalidWorkRecordStateError({
+      throw new InvalidAttendanceRecordStateError({
         operation: '休憩の終了',
         currentStatus,
       });
