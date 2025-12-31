@@ -22,11 +22,16 @@ export class PunchVO {
     this.createdAt = createdAt;
   }
 
-  public static create({
+  public static create({ punchType, occurredAt }: PunchVOParams): PunchVO {
+    return new PunchVO({ punchType, occurredAt });
+  }
+
+  public static reconstruct({
     punchType,
     occurredAt,
-  }: Omit<PunchVOParams, 'created_at'>): PunchVO {
-    return new PunchVO({ punchType, occurredAt });
+    createdAt,
+  }: PunchVOParams): PunchVO {
+    return new PunchVO({ punchType, occurredAt, createdAt });
   }
 
   public getPunchType(): PunchType {
