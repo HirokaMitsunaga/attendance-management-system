@@ -1,3 +1,5 @@
+import { DomainError } from '../../../../common/errors/domain.error';
+
 const parseHHmm = (hhmm: string): { h: number; m: number } => {
   const [hStr, mStr] = hhmm.split(':');
   const h = Number(hStr);
@@ -11,7 +13,7 @@ const parseHHmm = (hhmm: string): { h: number; m: number } => {
     m < 0 ||
     m > 59
   ) {
-    throw new Error(`不正な時刻形式です: ${hhmm}`);
+    throw new DomainError(`不正な時刻形式です: ${hhmm}`);
   }
 
   return { h, m };
