@@ -22,7 +22,10 @@ export class PunchVO {
     this.createdAt = createdAt;
   }
 
-  public static create({ punchType, occurredAt }: PunchVOParams): PunchVO {
+  public static create({
+    punchType,
+    occurredAt,
+  }: Omit<PunchVOParams, 'createdAt'>): PunchVO {
     return new PunchVO({ punchType, occurredAt });
   }
 
