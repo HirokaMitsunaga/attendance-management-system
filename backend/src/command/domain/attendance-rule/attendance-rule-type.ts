@@ -1,0 +1,6 @@
+export const RULE_TYPE = {
+  ALLOW_CLOCK_IN_ONLY_BEFORE_TIME: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+  ALLOW_CLOCK_OUT_ONLY_AFTER_TIME: 'ALLOW_CLOCK_OUT_ONLY_AFTER_TIME',
+} as const;
+
+export type RuleType = (typeof RULE_TYPE)[keyof typeof RULE_TYPE];
