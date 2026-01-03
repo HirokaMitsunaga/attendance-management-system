@@ -23,7 +23,7 @@
 
 ### 勤怠修正イベントは discriminated union（type）で表現する
 
-discriminated unionの参考：https://typescriptbook.jp/reference/values-types-variables/discriminated-union
+[discriminated union の参考 (TypeScript Handbook 日本語訳)](https://typescriptbook.jp/reference/values-types-variables/discriminated-union)
 
 - `REQUESTED / REJECTED / APPROVED / CANCELED` で **項目が異なる**
   - 例: `comment` は差し戻し時のみ、など
@@ -51,5 +51,3 @@ discriminated unionの参考：https://typescriptbook.jp/reference/values-types-
 - `source=NORMAL`: 画面からの通常打刻
 - `source=CORRECTION`: 勤怠修正の承認反映
   - `sourceId`: 勤怠修正のID（承認元）
-
-s
