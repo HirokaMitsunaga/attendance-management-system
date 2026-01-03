@@ -3,6 +3,7 @@ import { EntityId } from '../entity-id.vo';
 import { PUNCH_TYPE, PunchType } from '../common/punch/punch-type';
 import { PunchVO } from '../common/punch/punch.vo';
 import { InvalidAttendanceRecordStateError } from './attendance-record.error';
+import { PUNCH_SOURCE } from '../common/punch/punch-source';
 
 type AttendanceRecordParams = {
   id: EntityId;
@@ -74,6 +75,7 @@ export class AttendanceRecord {
     const punch = PunchVO.create({
       punchType: PUNCH_TYPE.CLOCK_IN,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
     this.punches.push(punch);
   }
@@ -90,6 +92,7 @@ export class AttendanceRecord {
     const punch = PunchVO.create({
       punchType: PUNCH_TYPE.CLOCK_OUT,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
     this.punches.push(punch);
   }
@@ -106,6 +109,7 @@ export class AttendanceRecord {
     const punch = PunchVO.create({
       punchType: PUNCH_TYPE.BREAK_START,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
     this.punches.push(punch);
   }
@@ -121,6 +125,7 @@ export class AttendanceRecord {
     const punch = PunchVO.create({
       punchType: PUNCH_TYPE.BREAK_END,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
     this.punches.push(punch);
   }
