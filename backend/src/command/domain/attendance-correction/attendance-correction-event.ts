@@ -15,7 +15,7 @@ type RequestedEvent = {
   requestedAt: Date;
   requestedBy: string;
   reason: string | null;
-  punches: CorrectionPunch[];
+  punchEvents: CorrectionPunchEvent[];
 };
 
 type RejectedEvent = {
@@ -30,7 +30,7 @@ type ApprovedEvent = {
   approvedAt: Date;
   approvedBy: string;
   // 承認時点で「何を承認したか」を固定しておく（後から申請内容が変わってもブレない）
-  punches: CorrectionPunch[];
+  punchEvents: CorrectionPunchEvent[];
 };
 
 type CanceledEvent = {
@@ -39,7 +39,7 @@ type CanceledEvent = {
   canceledBy: string;
 };
 
-export type CorrectionPunch = {
+export type CorrectionPunchEvent = {
   punchType: PunchType;
   occurredAt: Date;
 };
