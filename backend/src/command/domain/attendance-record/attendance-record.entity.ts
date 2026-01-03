@@ -1,7 +1,7 @@
 import { ATTENDANCE_STATUS, AttendanceStatus } from './attendance-status';
 import { EntityId } from '../entity-id.vo';
-import { PUNCH_TYPE, PunchType } from './punch/punch-type';
-import { PunchVO } from './punch/punch.vo';
+import { PUNCH_TYPE, PunchType } from '../common/punch/punch-type';
+import { PunchVO } from '../common/punch/punch.vo';
 import { InvalidAttendanceRecordStateError } from './attendance-record.error';
 
 type AttendanceRecordParams = {
