@@ -1,5 +1,12 @@
 import { PunchType } from '../common/punch/punch-type';
 
+/**
+ * 勤怠修正イベント（AttendanceCorrectionEvent）は「申請〜承認フローの事実イベント」を表す。
+ *
+ * - REQUESTED / REJECTED / APPROVED / CANCELED で保持する項目が異なるため、
+ *   discriminated union（typeで分岐できる型）として表現する
+ * - 承認反映時は、APPROVED に含まれる punchEvents を勤怠（PunchEvent）へ反映する
+ */
 export const ATTENDANCE_CORRECTION_EVENT_TYPE = {
   REQUESTED: 'REQUESTED',
   REJECTED: 'REJECTED',
@@ -15,7 +22,7 @@ type RequestedEvent = {
   requestedAt: Date;
   requestedBy: string;
   reason: string | null;
-  punches: CorrectionPunch[];
+  punchEvents: CorrectionPunchEvent[];
 };
 
 type RejectedEvent = {
@@ -30,7 +37,7 @@ type ApprovedEvent = {
   approvedAt: Date;
   approvedBy: string;
   // 承認時点で「何を承認したか」を固定しておく（後から申請内容が変わってもブレない）
-  punches: CorrectionPunch[];
+  punchEvents: CorrectionPunchEvent[];
 };
 
 type CanceledEvent = {
@@ -39,7 +46,7 @@ type CanceledEvent = {
   canceledBy: string;
 };
 
-export type CorrectionPunch = {
+export type CorrectionPunchEvent = {
   punchType: PunchType;
   occurredAt: Date;
 };

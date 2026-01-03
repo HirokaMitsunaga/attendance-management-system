@@ -6,7 +6,7 @@ import {
 } from './attendance-correction-status';
 import {
   AttendanceCorrectionEvent,
-  CorrectionPunch,
+  CorrectionPunchEvent,
   ATTENDANCE_CORRECTION_EVENT_TYPE,
   EventType,
 } from './attendance-correction-event';
@@ -46,9 +46,9 @@ export class AttendanceCorrection {
     requestedBy: string;
     requestedAt: Date;
     reason: string;
-    punches: CorrectionPunch[];
+    punchEvents: CorrectionPunchEvent[];
   }): AttendanceCorrection {
-    AttendanceCorrection.validatePunches(params.punches);
+    AttendanceCorrection.validatePunchEvents(params.punchEvents);
     //修正のエンティティ生成時に申請中のイベントを積む
     return new AttendanceCorrection({
       id: EntityId.generate(),
@@ -61,7 +61,7 @@ export class AttendanceCorrection {
           requestedAt: params.requestedAt,
           requestedBy: params.requestedBy,
           reason: params.reason,
-          punches: params.punches,
+          punchEvents: params.punchEvents,
         },
       ],
     });
@@ -97,7 +97,7 @@ export class AttendanceCorrection {
       type: ATTENDANCE_CORRECTION_EVENT_TYPE.APPROVED,
       approvedAt: params.approvedAt,
       approvedBy: params.approvedBy,
-      punches: requested.punches,
+      punchEvents: requested.punchEvents,
     });
   }
 
@@ -137,26 +137,26 @@ export class AttendanceCorrection {
     requestedBy: string;
     requestedAt: Date;
     reason: string | null;
-    punches: CorrectionPunch[];
+    punchEvents: CorrectionPunchEvent[];
   }): void {
     const status = this.getStatus();
     if (status !== ATTENDANCE_CORRECTION_STATUS.REJECTED) {
       throw new DomainError('差し戻し以外の勤怠修正は再申請できません');
     }
 
-    AttendanceCorrection.validatePunches(params.punches);
+    AttendanceCorrection.validatePunchEvents(params.punchEvents);
 
     this.events.push({
       type: ATTENDANCE_CORRECTION_EVENT_TYPE.REQUESTED,
       requestedAt: params.requestedAt,
       requestedBy: params.requestedBy,
       reason: params.reason,
-      punches: params.punches,
+      punchEvents: params.punchEvents,
     });
   }
 
   // 承認済みなら「勤怠記録へ反映するPunch」を返す
-  public getApprovedPunches(): CorrectionPunch[] {
+  public getApprovedPunchEvents(): CorrectionPunchEvent[] {
     const latestApproved = this.getLatestEventByType(
       ATTENDANCE_CORRECTION_EVENT_TYPE.APPROVED,
     );
@@ -165,7 +165,7 @@ export class AttendanceCorrection {
       latestApproved.type !== ATTENDANCE_CORRECTION_EVENT_TYPE.APPROVED
     )
       return [];
-    return latestApproved.punches;
+    return latestApproved.punchEvents;
   }
 
   public getStatus(): AttendanceCorrectionStatus {
@@ -217,9 +217,11 @@ export class AttendanceCorrection {
     return null;
   }
 
-  private static validatePunches(punches: CorrectionPunch[]): void {
+  private static validatePunchEvents(
+    punchEvents: CorrectionPunchEvent[],
+  ): void {
     //将来的に複数修正を許可する可能性があるため配列で保持している。ただし現状は validatePunchesで1件に制限している。
-    if (punches.length !== 1) {
+    if (punchEvents.length !== 1) {
       throw new DomainError('修正内容は1件のみ指定できます');
     }
   }

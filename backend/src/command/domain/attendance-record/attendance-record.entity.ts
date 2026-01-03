@@ -1,14 +1,15 @@
 import { ATTENDANCE_STATUS, AttendanceStatus } from './attendance-status';
 import { EntityId } from '../entity-id.vo';
 import { PUNCH_TYPE, PunchType } from '../common/punch/punch-type';
-import { PunchVO } from '../common/punch/punch.vo';
+import { PunchEvent } from '../common/punch/punch-event.vo';
 import { InvalidAttendanceRecordStateError } from './attendance-record.error';
+import { PUNCH_SOURCE } from '../common/punch/punch-source';
 
 type AttendanceRecordParams = {
   id: EntityId;
   userId: EntityId;
   workDate: Date;
-  punches: PunchVO[];
+  punchEvents: PunchEvent[];
 };
 
 // エンティティ（集約ルート）：AttendanceRecord
@@ -21,30 +22,30 @@ export class AttendanceRecord {
   private readonly workDate: Date; // その日の勤怠
 
   // 修正申請は別集約なので、ここは事実ログのまま
-  private punches: PunchVO[];
+  private punchEvents: PunchEvent[];
 
   private constructor({
     id,
     userId,
     workDate,
-    punches,
+    punchEvents,
   }: AttendanceRecordParams) {
     this.id = id;
     this.userId = userId;
     this.workDate = workDate;
-    this.punches = punches;
+    this.punchEvents = punchEvents;
   }
 
   public static create({
     userId,
     workDate,
-    punches,
+    punchEvents,
   }: Omit<AttendanceRecordParams, 'id'>) {
     return new AttendanceRecord({
       id: EntityId.generate(),
       userId,
       workDate,
-      punches,
+      punchEvents,
     });
   }
 
@@ -52,13 +53,13 @@ export class AttendanceRecord {
     id,
     userId,
     workDate,
-    punches,
+    punchEvents,
   }: AttendanceRecordParams) {
     return new AttendanceRecord({
       id,
       userId,
       workDate,
-      punches,
+      punchEvents,
     });
   }
 
@@ -71,11 +72,12 @@ export class AttendanceRecord {
       });
     }
 
-    const punch = PunchVO.create({
+    const punch = PunchEvent.create({
       punchType: PUNCH_TYPE.CLOCK_IN,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
-    this.punches.push(punch);
+    this.punchEvents.push(punch);
   }
 
   public clockOut({ occurredAt }: { occurredAt: Date }) {
@@ -87,11 +89,12 @@ export class AttendanceRecord {
       });
     }
 
-    const punch = PunchVO.create({
+    const punch = PunchEvent.create({
       punchType: PUNCH_TYPE.CLOCK_OUT,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
-    this.punches.push(punch);
+    this.punchEvents.push(punch);
   }
 
   public breakStart({ occurredAt }: { occurredAt: Date }) {
@@ -103,11 +106,12 @@ export class AttendanceRecord {
       });
     }
 
-    const punch = PunchVO.create({
+    const punch = PunchEvent.create({
       punchType: PUNCH_TYPE.BREAK_START,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
-    this.punches.push(punch);
+    this.punchEvents.push(punch);
   }
   public breakEnd({ occurredAt }: { occurredAt: Date }) {
     const currentStatus = this.latestWorkStatus();
@@ -118,11 +122,12 @@ export class AttendanceRecord {
       });
     }
 
-    const punch = PunchVO.create({
+    const punch = PunchEvent.create({
       punchType: PUNCH_TYPE.BREAK_END,
       occurredAt,
+      source: PUNCH_SOURCE.NORMAL,
     });
-    this.punches.push(punch);
+    this.punchEvents.push(punch);
   }
 
   public canClockIn(): boolean {
@@ -144,18 +149,18 @@ export class AttendanceRecord {
   //該当日付の中で一番最新の勤怠イベントを取得して現在の状態を返す関数
   private latestWorkStatus(): AttendanceStatus {
     // 該当日付の勤怠のみに絞る
-    const sortedPunches = [...this.punches]
+    const sortedPunchEvents = [...this.punchEvents]
       .filter((punch) => this.isSameDate(punch.getOccurredAt(), this.workDate))
       .sort(
         (a, b) => b.getOccurredAt().getTime() - a.getOccurredAt().getTime(),
       );
 
     //punch(勤怠)がない場合は勤務開始してない
-    if (sortedPunches.length === 0) {
+    if (sortedPunchEvents.length === 0) {
       return ATTENDANCE_STATUS.NOT_STARTED;
     }
 
-    const latestPunchType = sortedPunches[0].getPunchType();
+    const latestPunchType = sortedPunchEvents[0].getPunchType();
 
     const punchTypeToStatusMap: Record<PunchType, AttendanceStatus> = {
       [PUNCH_TYPE.CLOCK_IN]: ATTENDANCE_STATUS.WORKING,
@@ -185,7 +190,7 @@ export class AttendanceRecord {
   public getWorkDate(): Date {
     return this.workDate;
   }
-  public getPunches(): PunchVO[] {
-    return this.punches;
+  public getPunchEvents(): PunchEvent[] {
+    return this.punchEvents;
   }
 }

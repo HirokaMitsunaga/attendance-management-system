@@ -16,7 +16,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -25,7 +25,7 @@ describe('AttendanceCorrection Entity', () => {
       });
 
       expect(correction.getStatus()).toBe(ATTENDANCE_CORRECTION_STATUS.PENDING);
-      expect(correction.getApprovedPunches()).toEqual([]);
+      expect(correction.getApprovedPunchEvents()).toEqual([]);
     });
   });
 
@@ -58,7 +58,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: requestedPunches,
+        punchEvents: requestedPunches,
       });
 
       correction.approve({
@@ -69,7 +69,7 @@ describe('AttendanceCorrection Entity', () => {
       expect(correction.getStatus()).toBe(
         ATTENDANCE_CORRECTION_STATUS.APPROVED,
       );
-      expect(correction.getApprovedPunches()).toEqual(requestedPunches);
+      expect(correction.getApprovedPunchEvents()).toEqual(requestedPunches);
     });
 
     it('異常系: 申請中(PENDING)以外は承認できない', () => {
@@ -79,7 +79,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -120,7 +120,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: initialPunches,
+        punchEvents: initialPunches,
       });
 
       correction.reject({
@@ -133,7 +133,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:25:00.000Z'),
         reason: '遅延証明を添付',
-        punches: resubmittedPunches,
+        punchEvents: resubmittedPunches,
       });
 
       correction.approve({
@@ -144,7 +144,7 @@ describe('AttendanceCorrection Entity', () => {
       expect(correction.getStatus()).toBe(
         ATTENDANCE_CORRECTION_STATUS.APPROVED,
       );
-      expect(correction.getApprovedPunches()).toEqual(resubmittedPunches);
+      expect(correction.getApprovedPunchEvents()).toEqual(resubmittedPunches);
     });
 
     it('異常系: 1回の申請で複数の修正(Punch)は指定できない', () => {
@@ -155,7 +155,7 @@ describe('AttendanceCorrection Entity', () => {
           requestedBy: 'requester-1',
           requestedAt: new Date('2024-01-15T01:00:00.000Z'),
           reason: '電車遅延',
-          punches: [
+          punchEvents: [
             {
               punchType: PUNCH_TYPE.CLOCK_IN,
               occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -178,7 +178,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -204,7 +204,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -235,7 +235,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -251,7 +251,7 @@ describe('AttendanceCorrection Entity', () => {
       expect(correction.getStatus()).toBe(
         ATTENDANCE_CORRECTION_STATUS.CANCELED,
       );
-      expect(correction.getApprovedPunches()).toEqual([]);
+      expect(correction.getApprovedPunchEvents()).toEqual([]);
     });
   });
 
@@ -263,7 +263,7 @@ describe('AttendanceCorrection Entity', () => {
         requestedBy: 'requester-1',
         requestedAt: new Date('2024-01-15T01:00:00.000Z'),
         reason: '電車遅延',
-        punches: [
+        punchEvents: [
           {
             punchType: PUNCH_TYPE.CLOCK_IN,
             occurredAt: new Date('2024-01-15T01:05:00.000Z'),
@@ -276,7 +276,7 @@ describe('AttendanceCorrection Entity', () => {
           requestedBy: 'requester-1',
           requestedAt: new Date('2024-01-15T01:10:00.000Z'),
           reason: '追記',
-          punches: [
+          punchEvents: [
             {
               punchType: PUNCH_TYPE.CLOCK_IN,
               occurredAt: new Date('2024-01-15T01:06:00.000Z'),
