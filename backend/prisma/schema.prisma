@@ -62,7 +62,7 @@ model AttendancePunchEvent {
 
   @@index([attendanceRecordId, occurredAt])
   @@index([attendanceRecordId, createdAt])
-  @@unique([source,sourceId])
+  @@index([source, sourceId])
   @@map("attendance_punch_events")
 
   // NOTE:
