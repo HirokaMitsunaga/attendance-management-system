@@ -12,6 +12,8 @@ type AttendanceRuleparams = {
   enabled: boolean;
 };
 
+// 「AttendanceRule は単体の不変条件（type と setting の整合など）だけを保証する。」
+// 「occurredAt を使った出勤/退勤の可否判定は、ルール集合を扱う AttendanceRulePolicy 側で行う。」
 export class AttendanceRule {
   private readonly id: EntityId;
   private readonly targets: RuleTargetAction[];
