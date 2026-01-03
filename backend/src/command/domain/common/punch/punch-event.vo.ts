@@ -3,9 +3,13 @@ import { PunchType } from './punch-type';
 import { PUNCH_SOURCE, PunchSource } from './punch-source';
 import { DomainError } from '../../../../common/errors/domain.error';
 
-/*
-勤怠(Punch)はドメインイベントとして扱うため、書き込みのみ行い更新はしない。
-*/
+/**
+ * 勤怠（PunchEvent）は「勤務タイムラインの事実イベント」を表す Value Object。
+ *
+ * - append-only（更新しない前提）
+ * - すべてのイベントが共通の構造を持つため VO（クラス）で表現する
+ * - source/sourceId の整合性（NORMAL/CORRECTION）を不変条件として保証する
+ */
 //TODO:日を跨ぐ際にどのように登録するのか決める
 
 type PunchEventParams = {
