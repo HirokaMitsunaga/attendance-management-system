@@ -7,64 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ############################################################################
-//  ENUMS (列挙型)
-// ############################################################################
-
-/// ユーザー権限
-enum UserRole {
-  user
-  admin
+enum PunchType {
+  CLOCK_IN
+  CLOCK_OUT
+  BREAK_START
+  BREAK_END
 }
 
-/// 性別
-enum Gender {
-  male
-  female
-  other
+enum PunchSource {
+  NORMAL
+  CORRECTION
 }
 
-// ############################################################################
-//  USER ONLY (ユーザーのみのシンプル構成)
-// ############################################################################
-
-/// ユーザー管理
-model User {
-  id        String   @id @default(ulid())
-  email     String   @unique
-  role      UserRole @default(user)
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  gender    Gender?
-
-  // Audit
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  createdBy String   @map("created_by")
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  updatedBy String   @map("updated_by")
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
-  deletedBy String?   @map("deleted_by")
-
-  @@index([deletedAt])
-  @@map("users")
+enum AttendanceCorrectionStatus {
+  PENDING
+  REJECTED
+  APPROVED
+  CANCELED
 }
 
-/// 検索条件保存
-model SearchCondition {
-  id        String @id @default(ulid())
-  formType  String @map("form_type")
-  name      String
-  urlParams String @map("url_params")
+/// 勤怠修正イベント種別（申請/差し戻し/承認/取り下げ）
+enum AttendanceCorrectionEventType {
+  REQUESTED
+  REJECTED
+  APPROVED
+  CANCELED
+}
 
-  // Audit
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  createdBy String   @map("created_by")
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  updatedBy String   @map("updated_by")
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
-  deletedBy String?   @map("deleted_by")
+model AttendanceRecord {
+  id        String            @id
+  userId    String
+  workDate  DateTime
+  punchEvents   AttendancePunchEvent[]
 
-  @@unique([formType, name])
-  @@index([deletedAt])
-  @@map("search_conditions")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([userId, workDate])
+  @@map("attendance_records")
+}
+
+//勤怠の事実をそのままイベントとして持っているため(状態遷移するわけではない)
+model AttendancePunchEvent {
+  id                 String        @id @default(ulid())
+  attendanceRecordId String
+  attendanceRecord   AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
+
+  punchType  PunchType
+  occurredAt DateTime
+  createdAt  DateTime      @default(now())
+
+  source     PunchSource
+  sourceId   String?       // PunchSourceがCORRECTION の場合だけ埋める（通常はnull）
+
+  @@index([attendanceRecordId, occurredAt])
+  @@index([attendanceRecordId, createdAt])
+  @@unique([source,sourceId])
+  @@map("attendance_punch_events")
+
+  // NOTE:
+  // 冪等性をDBで強く担保したい場合、
+  // Postgresの「部分ユニークインデックス（WHERE source='CORRECTION'）」が理想だが
+  // Prisma schema だけでは表現できないので migration.sql に追記するのが安全。
+  //
+  // 例（migration.sqlに追記する想定）:
+  // CREATE UNIQUE INDEX attendance_punches_correction_unique
+  // ON attendance_punches (source, source_id, punch_type)
+  // WHERE source = 'CORRECTION';
+}
+model AttendanceCorrection {
+  id       String                    @id @default(ulid())
+  userId   String
+  workDate DateTime                  // 可能なら @db.Date を検討（「日」ならDateが安全）
+  reason   String                    // 申請理由（必要ならREQUESTEDイベントのreasonと同じにする）
+  status   AttendanceCorrectionStatus // 最終イベントから導出した状態を保存（一覧検索用）
+
+  events   AttendanceCorrectionEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, workDate])
+  @@index([status])
+  @@map("attendance_corrections")
+}
+
+model AttendanceCorrectionEvent {
+  id                    String                     @id @default(ulid())
+  attendanceCorrectionId String
+  attendanceCorrection   AttendanceCorrection      @relation(fields: [attendanceCorrectionId], references: [id], onDelete: Cascade)
+
+  type       AttendanceCorrectionEventType
+  occurredAt DateTime   // REQUESTEDのrequestedAt / APPROVEDのapprovedAt / REJECTEDのrejectedAt / CANCELEDのcanceledAt
+  actorUserId String    // requestedBy / approvedBy / rejectedBy / canceledBy
+
+  reason  String?       // REQUESTED / 再申請時のみ
+  comment String?       // REJECTED時のみ
+
+  // 修正対象のPunch群（将来の複数対応のためJsonで保持）
+  // 例: [{ "punchType": "CLOCK_IN", "occurredAt": "2024-01-15T01:05:00.000Z" }]
+  punches Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([attendanceCorrectionId, createdAt])
+  @@index([attendanceCorrectionId, type])
+  @@map("attendance_correction_events")
 }
