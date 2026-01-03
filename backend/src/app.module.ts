@@ -1,18 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggerModule } from './config/logger.module';
-import { UsersModule } from './users/users.module';
-import { SearchConditionsModule } from './search-conditions/search-conditions.module';
-import { MeModule } from './me/me.module';
 
 @Module({
-  imports: [
-    LoggerModule,
-    PrismaModule,
-    UsersModule,
-    SearchConditionsModule,
-    MeModule,
-  ],
+  imports: [LoggerModule, PrismaModule],
   controllers: [],
   providers: [],
 })

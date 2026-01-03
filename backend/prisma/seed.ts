@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { seedUsers } from './seeds/user.seed';
 
 // DATABASE_URLが未設定の場合はデフォルト値を設定
 if (!process.env.DATABASE_URL) {
@@ -16,9 +15,8 @@ async function main() {
   console.log('データベースのシードを開始...\n');
 
   try {
-    // Userのみシード
-    await seedUsers({ prisma });
-    console.log('');
+    // NOTE:
+    // 現在のスキーマでは users/search_conditions を削除しているため、seedは何もしない。
 
     console.log('すべてのシードが正常に完了しました！');
   } catch (error) {
