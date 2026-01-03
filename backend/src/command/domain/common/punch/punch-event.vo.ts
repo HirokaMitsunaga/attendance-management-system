@@ -8,7 +8,7 @@ import { DomainError } from '../../../../common/errors/domain.error';
 */
 //TODO:日を跨ぐ際にどのように登録するのか決める
 
-type PunchVOParams = {
+type PunchEventParams = {
   punchType: PunchType;
   occurredAt: Date;
   createdAt?: Date;
@@ -16,7 +16,7 @@ type PunchVOParams = {
   sourceId?: EntityId;
 };
 
-export class PunchVO {
+export class PunchEvent {
   private readonly punchType: PunchType;
   private readonly occurredAt: Date; // 実際に起きた時刻（アプリ側の時刻でOK）
   private readonly createdAt?: Date; //最新の勤怠のイベントを算出する際に使う(DB保存時の時刻にする)
@@ -29,7 +29,7 @@ export class PunchVO {
     createdAt,
     source,
     sourceId,
-  }: PunchVOParams) {
+  }: PunchEventParams) {
     if (source === PUNCH_SOURCE.CORRECTION && !sourceId) {
       throw new DomainError('修正打刻にはsourceIdが必要です');
     }
@@ -48,8 +48,8 @@ export class PunchVO {
     occurredAt: Date;
     source?: PunchSource;
     sourceId?: EntityId;
-  }): PunchVO {
-    return new PunchVO({
+  }): PunchEvent {
+    return new PunchEvent({
       punchType: params.punchType,
       occurredAt: params.occurredAt,
       source: params.source ?? PUNCH_SOURCE.NORMAL,
@@ -63,8 +63,14 @@ export class PunchVO {
     createdAt,
     source,
     sourceId,
-  }: PunchVOParams): PunchVO {
-    return new PunchVO({ punchType, occurredAt, createdAt, source, sourceId });
+  }: PunchEventParams): PunchEvent {
+    return new PunchEvent({
+      punchType,
+      occurredAt,
+      createdAt,
+      source,
+      sourceId,
+    });
   }
 
   public getPunchType(): PunchType {
