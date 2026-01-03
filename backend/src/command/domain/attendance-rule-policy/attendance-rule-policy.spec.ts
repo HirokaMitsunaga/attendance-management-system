@@ -1,5 +1,3 @@
-import { EntityId } from '../entity-id.vo';
-import { AttendanceRecord } from '../attendance-record/attendance-record.entity';
 import { AttendanceRule } from '../attendance-rule/attendance-rule.entity';
 import { RULE_TARGET_ACTION } from '../attendance-rule/attendance-rule-target-action';
 import { RULE_TYPE } from '../attendance-rule/attendance-rule-type';
@@ -8,13 +6,6 @@ import { DomainError } from '../../../common/errors/domain.error';
 
 describe('AttendanceRulePolicy', () => {
   const policy = new AttendanceRulePolicy();
-
-  const fixedDate = new Date('2024-01-15T00:00:00.000Z');
-  const attendanceRecord = AttendanceRecord.create({
-    userId: EntityId.generate(),
-    workDate: fixedDate,
-    punches: [],
-  });
 
   describe('ensureCanClockIn', () => {
     it('正常系: 10:30ちょうどは出勤可能', () => {
@@ -30,7 +21,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockIn({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 10, 30, 0),
         });
@@ -50,7 +40,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockIn({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 10, 31, 0),
         });
@@ -70,7 +59,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockIn({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 10, 31, 0),
         });
@@ -90,7 +78,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockIn({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 10, 31, 0),
         });
@@ -112,7 +99,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockOut({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 17, 0, 0),
         });
@@ -132,7 +118,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockOut({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 16, 59, 0),
         });
@@ -152,7 +137,6 @@ describe('AttendanceRulePolicy', () => {
 
       expect(() => {
         policy.ensureCanClockOut({
-          attendanceRecord,
           rules: [rule],
           occurredAt: new Date(2024, 0, 15, 16, 59, 0),
         });

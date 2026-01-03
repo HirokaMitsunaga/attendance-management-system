@@ -1,5 +1,3 @@
-// command/domain/attendance-rule-policy/attendance-rule-policy.ts
-import { AttendanceRecord } from '../attendance-record/attendance-record.entity';
 import { AttendanceRule } from '../attendance-rule/attendance-rule.entity';
 import {
   RULE_TARGET_ACTION,
@@ -11,7 +9,6 @@ import { DomainError } from '../../../common/errors/domain.error';
 
 export class AttendanceRulePolicy {
   public ensureCanClockIn(params: {
-    attendanceRecord: AttendanceRecord;
     rules: AttendanceRule[];
     occurredAt: Date;
   }): void {
@@ -33,7 +30,6 @@ export class AttendanceRulePolicy {
   }
 
   public ensureCanClockOut(params: {
-    attendanceRecord: AttendanceRecord;
     rules: AttendanceRule[];
     occurredAt: Date;
   }): void {
