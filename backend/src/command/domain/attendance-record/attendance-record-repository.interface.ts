@@ -1,7 +1,8 @@
+import { EntityId } from '../entity-id.vo';
 import { AttendanceRecord } from './attendance-record.entity';
 
 export type FindAttendanceRecordParams = {
-  userId: string;
+  userId: EntityId;
   workDate: Date; // 日付の扱いは DateUtil で正規化したものを渡す
 };
 

@@ -21,7 +21,7 @@ export class ClockOutAttendanceRecordUseCase {
 
     const record =
       await this.attendanceRecordRepository.findByUserIdAndWorkDate({
-        userId: userId.getEntityId(),
+        userId,
         workDate: params.workDate,
       });
 
