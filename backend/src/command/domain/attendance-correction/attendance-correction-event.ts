@@ -17,7 +17,20 @@ export const ATTENDANCE_CORRECTION_EVENT_TYPE = {
 export type EventType =
   (typeof ATTENDANCE_CORRECTION_EVENT_TYPE)[keyof typeof ATTENDANCE_CORRECTION_EVENT_TYPE];
 
-type RequestedEvent = {
+type BaseEvent = {
+  /**
+   * DB復元したイベントには createdAt が入る（未永続は undefined）
+   * => Repository が差分（新規イベント）判定に使う
+   */
+  createdAt?: Date;
+};
+
+export type CorrectionPunchEvent = {
+  punchType: PunchType;
+  occurredAt: Date;
+};
+
+type RequestedEvent = BaseEvent & {
   type: typeof ATTENDANCE_CORRECTION_EVENT_TYPE.REQUESTED;
   requestedAt: Date;
   requestedBy: string;
@@ -25,30 +38,24 @@ type RequestedEvent = {
   punchEvents: CorrectionPunchEvent[];
 };
 
-type RejectedEvent = {
+type RejectedEvent = BaseEvent & {
   type: typeof ATTENDANCE_CORRECTION_EVENT_TYPE.REJECTED;
   rejectedAt: Date;
   rejectedBy: string;
   comment: string | null;
 };
 
-type ApprovedEvent = {
+type ApprovedEvent = BaseEvent & {
   type: typeof ATTENDANCE_CORRECTION_EVENT_TYPE.APPROVED;
   approvedAt: Date;
   approvedBy: string;
-  // 承認時点で「何を承認したか」を固定しておく（後から申請内容が変わってもブレない）
   punchEvents: CorrectionPunchEvent[];
 };
 
-type CanceledEvent = {
+type CanceledEvent = BaseEvent & {
   type: typeof ATTENDANCE_CORRECTION_EVENT_TYPE.CANCELED;
   canceledAt: Date;
   canceledBy: string;
-};
-
-export type CorrectionPunchEvent = {
-  punchType: PunchType;
-  occurredAt: Date;
 };
 
 export type AttendanceCorrectionEvent =

@@ -80,15 +80,13 @@ model AttendanceCorrection {
   userId   String
   workDate DateTime                  // 可能なら @db.Date を検討（「日」ならDateが安全）
   reason   String                    // 申請理由（必要ならREQUESTEDイベントのreasonと同じにする）
-  status   AttendanceCorrectionStatus // 最終イベントから導出した状態を保存（一覧検索用）
 
   events   AttendanceCorrectionEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workDate])
-  @@index([status])
+  @@unique([userId, workDate])
   @@map("attendance_corrections")
 }
 
@@ -106,7 +104,7 @@ model AttendanceCorrectionEvent {
 
   // 修正対象のPunch群（将来の複数対応のためJsonで保持）
   // 例: [{ "punchType": "CLOCK_IN", "occurredAt": "2024-01-15T01:05:00.000Z" }]
-  punches Json?
+  punches Json? //REQUESTED / APPROVEDはpunchesが存在するがREJECTED / CANCELEDではpunchesが存在しない
 
   createdAt DateTime @default(now())
 
