@@ -1,0 +1,38 @@
+import { Injectable } from '@nestjs/common';
+import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
+import { EntityId } from 'src/command/domain/entity-id.vo';
+import { NotFoundError } from 'src/common/errors/not-found.error';
+import { formatDateToISOString } from 'src/common/utils/date.utils';
+
+export type BreakStartAttendanceRecordParams = {
+  userId: string;
+  workDate: Date;
+  occurredAt: Date;
+};
+
+@Injectable()
+export class BreakStartAttendanceRecordUseCase {
+  constructor(
+    private readonly attendanceRecordRepository: IAttendanceRecordRepository,
+  ) {}
+
+  async execute(params: BreakStartAttendanceRecordParams): Promise<void> {
+    const userId = EntityId.create({ entityId: params.userId });
+
+    const record =
+      await this.attendanceRecordRepository.findByUserIdAndWorkDate({
+        userId: userId.getEntityId(),
+        workDate: params.workDate,
+      });
+
+    if (!record) {
+      throw new NotFoundError(
+        '勤怠記録',
+        `${params.userId}:${formatDateToISOString(params.workDate)}`,
+      );
+    }
+
+    record.breakStart({ occurredAt: params.occurredAt });
+    await this.attendanceRecordRepository.save({ record });
+  }
+}
