@@ -80,7 +80,6 @@ model AttendanceCorrection {
   userId   String
   workDate DateTime                  // 可能なら @db.Date を検討（「日」ならDateが安全）
   reason   String                    // 申請理由（必要ならREQUESTEDイベントのreasonと同じにする）
-  status   AttendanceCorrectionStatus // 最終イベントから導出した状態を保存（一覧検索用）
 
   events   AttendanceCorrectionEvent[]
 
@@ -88,7 +87,6 @@ model AttendanceCorrection {
   updatedAt DateTime @updatedAt
 
   @@index([userId, workDate])
-  @@index([status])
   @@map("attendance_corrections")
 }
 
