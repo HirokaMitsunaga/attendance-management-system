@@ -9,7 +9,9 @@ import { PunchEvent } from '../domain/common/punch/punch-event.vo';
 import { EntityId } from '../domain/entity-id.vo';
 
 @Injectable()
-export class AttendanceRecordRepositoryPrisma implements IAttendanceRecordRepository {
+export class AttendanceRecordRepositoryPrisma
+  implements IAttendanceRecordRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserIdAndWorkDate(
