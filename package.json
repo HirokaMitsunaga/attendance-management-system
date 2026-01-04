@@ -19,13 +19,13 @@
   },
   "lint-staged": {
     "backend/**/*.{ts,tsx}": [
-      "npx prettier --write"
+      "./backend/node_modules/.bin/prettier --write"
     ],
     "frontend/**/*.{ts,tsx}": [
-      "npx prettier --write"
+      "./node_modules/.bin/prettier --write"
     ],
     "*.{json,md,yml,yaml}": [
-      "npx prettier --write"
+      "./node_modules/.bin/prettier --write"
     ]
   }
 }

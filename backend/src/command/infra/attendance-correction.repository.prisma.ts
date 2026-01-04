@@ -17,7 +17,9 @@ import {
 type PersistedPunch = { punchType: string; occurredAt: string };
 
 @Injectable()
-export class AttendanceCorrectionRepositoryPrisma implements IAttendanceCorrectionRepository {
+export class AttendanceCorrectionRepositoryPrisma
+  implements IAttendanceCorrectionRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserIdAndWorkDate(
