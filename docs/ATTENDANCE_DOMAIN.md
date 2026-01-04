@@ -51,3 +51,30 @@
 - `source=NORMAL`: 画面からの通常打刻
 - `source=CORRECTION`: 勤怠修正の承認反映
   - `sourceId`: 勤怠修正のID（承認元）
+
+## 永続化（Repository）方針
+
+### 目的
+
+- 勤怠は **「日次集約（AttendanceRecord）＋イベント（PunchEvent）追加」** で成立するため、永続化も「集約の差分更新」ではなく **イベント追加**を中心に設計する。
+- `attendance_records` は `(userId, workDate)` で一意（`@@unique([userId, workDate])`）のため、「その日が初回かどうか」で分岐しない永続化が望ましい。
+
+### 方針（connectOrCreate）
+
+- `attendance_punch_events` を追加する際に、親の `attendance_records` を `connectOrCreate` で解決する。
+  - **その日の record が無ければ作成**
+  - **あれば接続してイベントのみ追加**
+- Prisma の `createMany` は `connectOrCreate` を使えないため、イベント追加は 1件ずつ `create` を行う。
+
+### save(record) の前提
+
+- `AttendanceRecordRepository.save({ record })` は、「集約全体を保存」ではなく **新規に追加された PunchEvent だけ**を永続化する。
+- 判定はドメインVOの設計に合わせて以下とする：
+  - **DB復元した PunchEvent には `createdAt` が入る**
+  - **新規に追加した PunchEvent は `createdAt` が未設定（undefined）**
+  - よって `createdAt === undefined` を「未永続化イベント」として扱う
+
+### トランザクション方針
+
+- **単発の打刻（イベント追加のみ）**は、`connectOrCreate + punch event create` が1操作で完結するため、UseCaseで必須ではない。
+  ∂
