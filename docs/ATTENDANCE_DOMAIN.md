@@ -77,4 +77,41 @@
 ### トランザクション方針
 
 - **単発の打刻（イベント追加のみ）**は、`connectOrCreate + punch event create` が1操作で完結するため、UseCaseで必須ではない。
-  ∂
+
+## createdAt の扱い（永続化判定と並び順）
+
+### 目的
+
+本プロジェクトでは「イベントを append-only で積む」設計のため、Repository が **差分（新規イベント）だけ**を永続化できる仕組みが必要になる。
+
+### 方針
+
+- `createdAt` は **DBに保存された時刻**として扱う
+- ただし Repository 実装では `createdAt` を **「永続化済みかどうかの判定（フラグ）」**としても利用する
+  - **DB復元したイベント**: `createdAt` が入る
+  - **新規に追加したイベント**: `createdAt` は `undefined` のまま
+  - Repository は `createdAt === undefined` のイベントだけを insert する
+
+### 注意点（並び順）
+
+このプロジェクトでは、`occurredAt` は **モデルに依らず**「そのイベントが実際に起きた時刻」として同じ意味で扱う。
+
+- **AttendancePunchEvent（勤怠の打刻）**
+  - `occurredAt`: 打刻が「実際に起きた時刻」（勤務タイムライン上の時刻）
+  - 状態導出（WORKING/FINISHED等）や時系列は、原則 `occurredAt` を基準に扱う
+
+- **AttendanceCorrectionEvent（勤怠修正のイベント）**
+  - `occurredAt`: 申請/承認/差し戻し/取り下げ等の「イベントが起きた時刻」（requestedAt/approvedAt... を統一して保持）
+  - 状態導出（PENDING/APPROVED等）や履歴の時系列は、原則 `occurredAt` を基準に扱う
+
+`createdAt` は「DBに保存された時刻」であり、以下に限定して利用する：
+
+- Repository が **永続化済み判定**（`createdAt === undefined` を未永続として insert 対象にする）に使う
+- 並び順で同時刻が発生しうる場合の **安定ソートの補助**（例：`occurredAt ASC, createdAt ASC, id ASC`）
+
+### 将来的な改善案
+
+- `createdAt` の二重用途（時刻 + 永続化判定）を避けたい場合は、以下のいずれかに移行する可能性がある
+  - **イベントに `id`（永続化ID）を持たせる**（例：`attendance_correction_events.id` をドメインイベントに取り込む）
+    - 保存済み判定が時刻に依存しなくなる
+  - **`persistedAt` のような専用フィールドを追加**し、`createdAt` と役割を分離する
