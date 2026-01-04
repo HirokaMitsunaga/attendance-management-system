@@ -18,6 +18,9 @@ export class ClockInAttendanceRecordUseCase {
   async execute(params: ClockInAttendanceRecordParams): Promise<void> {
     const userId = EntityId.create({ entityId: params.userId });
 
+    // 既存の勤怠記録があれば必ず復元して使う。
+    // 理由：状態遷移（例: 二重出勤防止）は punchEvents を元に判定されるため、
+    // 常に新規作成すると過去イベントを見落としてルールが効かなくなる。
     const record =
       (await this.attendanceRecordRepository.findByUserIdAndWorkDate({
         userId: userId.getEntityId(),
