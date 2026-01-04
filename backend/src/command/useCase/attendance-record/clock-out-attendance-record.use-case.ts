@@ -27,7 +27,7 @@ export class ClockOutAttendanceRecordUseCase {
 
     if (!record) {
       throw new NotFoundError(
-        '勤怠',
+        '勤怠記録',
         `${params.userId}:${formatDateToISOString(params.workDate)}`,
       );
     }
