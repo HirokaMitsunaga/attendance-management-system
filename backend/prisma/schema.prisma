@@ -86,7 +86,7 @@ model AttendanceCorrection {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workDate])
+  @@unique([userId, workDate])
   @@map("attendance_corrections")
 }
 
