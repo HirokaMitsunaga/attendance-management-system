@@ -1,4 +1,5 @@
-import { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
+import { Injectable } from '@nestjs/common';
+import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { AttendanceRecord } from 'src/command/domain/attendance-record/attendance-record.entity';
 import { EntityId } from 'src/command/domain/entity-id.vo';
 
@@ -7,6 +8,8 @@ export type ClockInAttendanceRecordParams = {
   workDate: Date;
   occurredAt: Date;
 };
+
+@Injectable()
 export class ClockInAttendanceRecordUseCase {
   constructor(
     private readonly attendanceRecordRepository: IAttendanceRecordRepository,
@@ -15,7 +18,6 @@ export class ClockInAttendanceRecordUseCase {
   async execute(params: ClockInAttendanceRecordParams): Promise<void> {
     const userId = EntityId.create({ entityId: params.userId });
 
-    //打刻の時に勤怠記録が作成されるが
     const record =
       (await this.attendanceRecordRepository.findByUserIdAndWorkDate({
         userId: userId.getEntityId(),

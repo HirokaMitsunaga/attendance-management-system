@@ -1,4 +1,5 @@
-import { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
+import { Injectable } from '@nestjs/common';
+import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { EntityId } from 'src/command/domain/entity-id.vo';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import { formatDateToISOString } from 'src/common/utils/date.utils';
@@ -9,6 +10,7 @@ export type BreakStartAttendanceRecordParams = {
   occurredAt: Date;
 };
 
+@Injectable()
 export class BreakStartAttendanceRecordUseCase {
   constructor(
     private readonly attendanceRecordRepository: IAttendanceRecordRepository,
