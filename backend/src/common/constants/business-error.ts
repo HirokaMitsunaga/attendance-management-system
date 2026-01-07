@@ -31,3 +31,7 @@ export const ATTENDANCE_CORRECTION = {
   ALREADY_EXISTS: '既に勤怠修正申請が存在するため申請できません',
   NOT_FOUND: '勤怠修正申請が存在しません',
 } as const;
+
+export const ATTENDANCE_RECORD = {
+  NOT_FOUND: '勤怠記録',
+} as const;

@@ -3,6 +3,7 @@ import type { IAttendanceCorrectionRepository } from 'src/command/domain/attenda
 import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { AttendanceCorrectionApproval } from 'src/command/domain/attendance-correction/attendance-correction-approval';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_RECORD } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import { formatDateToISOString } from 'src/common/utils/date.utils';
 
@@ -31,7 +32,7 @@ export class ApproveAttendanceCorrectionUseCase {
 
     if (!correction) {
       throw new NotFoundError(
-        '勤怠修正',
+        ATTENDANCE_RECORD.NOT_FOUND,
         `${params.userId}:${formatDateToISOString(params.workDate)}`,
       );
     }
@@ -51,7 +52,7 @@ export class ApproveAttendanceCorrectionUseCase {
       });
     if (!record) {
       throw new NotFoundError(
-        '勤怠記録',
+        ATTENDANCE_RECORD.NOT_FOUND,
         `${params.userId}:${formatDateToISOString(params.workDate)}`,
       );
     }

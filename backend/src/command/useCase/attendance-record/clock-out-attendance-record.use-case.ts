@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_RECORD } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import { formatDateToISOString } from 'src/common/utils/date.utils';
 
@@ -27,7 +28,7 @@ export class ClockOutAttendanceRecordUseCase {
 
     if (!record) {
       throw new NotFoundError(
-        '勤怠記録',
+        ATTENDANCE_RECORD.NOT_FOUND,
         `${params.userId}:${formatDateToISOString(params.workDate)}`,
       );
     }

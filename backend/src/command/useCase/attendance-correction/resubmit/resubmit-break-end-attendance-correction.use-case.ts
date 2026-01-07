@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { IAttendanceCorrectionRepository } from 'src/command/domain/attendance-correction/attendance-correction-repository.interface';
 import { PUNCH_TYPE } from 'src/command/domain/common/punch/punch-type';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_RECORD } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import {
   getCurrentDate,
@@ -35,7 +36,7 @@ export class ResubmitBreakEndAttendanceCorrectionUseCase {
 
     if (!correction) {
       throw new NotFoundError(
-        '勤怠修正',
+        ATTENDANCE_RECORD.NOT_FOUND,
         `${params.userId}:${formatDateToISOString(params.workDate)}`,
       );
     }
