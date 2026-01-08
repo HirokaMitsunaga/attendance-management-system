@@ -23,7 +23,7 @@ export class ClockInAttendanceRecordUseCase {
     // 常に新規作成すると過去イベントを見落としてルールが効かなくなる。
     const record =
       (await this.attendanceRecordRepository.findByUserIdAndWorkDate({
-        userId: userId.getEntityId(),
+        userId,
         workDate: params.workDate,
       })) ??
       AttendanceRecord.create({

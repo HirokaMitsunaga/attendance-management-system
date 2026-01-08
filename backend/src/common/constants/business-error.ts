@@ -26,3 +26,12 @@ export const ID_REQUIRED = 'IDが必要です';
 
 export const getEntityIdRequired = (entityName: string): string =>
   `${entityName}を更新する際は${entityName}Entity.idが必要です`;
+
+export const ATTENDANCE_CORRECTION = {
+  ALREADY_EXISTS: '既に勤怠修正申請が存在するため申請できません',
+  NOT_FOUND: '勤怠修正申請が存在しません',
+} as const;
+
+export const ATTENDANCE_RECORD = {
+  NOT_FOUND: '勤怠記録',
+} as const;

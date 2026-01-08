@@ -20,7 +20,7 @@ export class AttendanceRecordRepositoryPrisma
     const record = await this.prisma.attendanceRecord.findUnique({
       where: {
         userId_workDate: {
-          userId: params.userId,
+          userId: params.userId.getEntityId(),
           workDate: params.workDate,
         },
       },
