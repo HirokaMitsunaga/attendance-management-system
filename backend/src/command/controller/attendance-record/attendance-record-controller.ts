@@ -2,9 +2,9 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import {
   clockInEventRequestSchema,
   type ClockInEventRequestDto,
-} from 'src/command/request/clockInEventRequest';
-import { ClockInAttendanceRecordUseCase } from 'src/command/useCase/attendance-record/clock-in-attendance-record.use-case';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+} from '../../request/clockInEventRequest';
+import { ClockInAttendanceRecordUseCase } from '../../useCase/attendance-record/clock-in-attendance-record.use-case';
+import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 
 @Controller('attendance-record')
 export class AttendanceRecordController {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { INVALID_FORMAT, REQUIRED_FIELD } from 'src/common/constants';
-import { parseISOString } from 'src/common/utils/date.utils';
+import { INVALID_FORMAT, REQUIRED_FIELD } from '../../common/constants';
+import { parseISOString } from '../../common/utils/date.utils';
 
 const dateFromJsonSchema = (fieldLabel: string) =>
   z
