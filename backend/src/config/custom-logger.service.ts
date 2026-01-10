@@ -6,6 +6,12 @@ import { getCurrentDate } from '../common/utils/date.utils';
 export class CustomLoggerService implements LoggerService {
   constructor(private readonly traceService: TraceService) {}
 
+  private isTestEnv(): boolean {
+    return (
+      process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID != null
+    );
+  }
+
   private formatLog(
     level: string,
     message: string,
@@ -28,11 +34,12 @@ export class CustomLoggerService implements LoggerService {
   }
 
   log(message: string, context?: string) {
-    console.log('===== CustomLoggerService =====');
+    if (this.isTestEnv()) return;
     console.log(this.formatLog('LOG', message, context));
   }
 
   error(message: string | Error, trace?: string, context?: string) {
+    if (this.isTestEnv()) return;
     let outputMessage = '';
     let outputTrace = trace;
 
@@ -48,25 +55,22 @@ export class CustomLoggerService implements LoggerService {
       outputMessage = message;
     }
 
-    console.log('===== CustomLoggerService =====');
     console.error(this.formatLog('ERROR', outputMessage, context, outputTrace));
   }
 
   warn(message: string, context?: string) {
-    console.log('===== CustomLoggerService =====');
+    if (this.isTestEnv()) return;
     console.warn(this.formatLog('WARN', message, context));
   }
 
   debug(message: string, context?: string) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('===== CustomLoggerService =====');
+    if (process.env.NODE_ENV === 'development' && !this.isTestEnv()) {
       console.debug(this.formatLog('DEBUG', message, context));
     }
   }
 
   verbose(message: string, context?: string) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('===== CustomLoggerService =====');
+    if (process.env.NODE_ENV === 'development' && !this.isTestEnv()) {
       console.log(this.formatLog('VERBOSE', message, context));
     }
   }

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
-import { AttendanceRecord } from 'src/command/domain/attendance-record/attendance-record.entity';
-import { EntityId } from 'src/command/domain/entity-id.vo';
+import { Inject, Injectable } from '@nestjs/common';
+import type { IAttendanceRecordRepository } from '../../domain/attendance-record/attendance-record-repository.interface';
+import { AttendanceRecord } from '../../domain/attendance-record/attendance-record.entity';
+import { EntityId } from '../../domain/entity-id.vo';
+import { ATTENDANCE_RECORD_REPOSITORY } from '../../domain/attendance-record/attendance-record.tokens';
 
 export type ClockInAttendanceRecordParams = {
   userId: string;
@@ -12,6 +13,7 @@ export type ClockInAttendanceRecordParams = {
 @Injectable()
 export class ClockInAttendanceRecordUseCase {
   constructor(
+    @Inject(ATTENDANCE_RECORD_REPOSITORY)
     private readonly attendanceRecordRepository: IAttendanceRecordRepository,
   ) {}
 
