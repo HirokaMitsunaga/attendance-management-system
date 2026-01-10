@@ -159,4 +159,123 @@ describeDb('AttendanceRecordController (integration)', () => {
       'userId: ユーザーIDは必須です',
     );
   });
+
+  it('正常系: clock-outで退勤の打刻イベントが追加される', async () => {
+    const userId = ulid();
+    const workDateIso = '2026-01-13T00:00:00.000Z';
+    const clockInOccurredAtIso = '2026-01-13T09:00:00.000Z';
+    const clockOutOccurredAtIso = '2026-01-13T18:00:00.000Z';
+    const recordId = ulid();
+
+    // 出勤記録を事前に作成
+    await prisma.attendanceRecord.create({
+      data: {
+        id: recordId,
+        userId,
+        workDate: parseISOString(workDateIso),
+        punchEvents: {
+          create: {
+            id: ulid(),
+            punchType: 'CLOCK_IN',
+            occurredAt: parseISOString(clockInOccurredAtIso),
+            source: 'NORMAL',
+          },
+        },
+      },
+    });
+
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
+    await request(httpServer as never)
+      .post('/attendance-record/clock-out')
+      .send({
+        userId,
+        workDate: workDateIso,
+        occurredAt: clockOutOccurredAtIso,
+      })
+      .expect(200);
+
+    const record = await prisma.attendanceRecord.findUnique({
+      where: {
+        userId_workDate: {
+          userId,
+          workDate: parseISOString(workDateIso),
+        },
+      },
+      include: {
+        punchEvents: {
+          orderBy: { occurredAt: 'asc' },
+        },
+      },
+    });
+
+    expect(record).not.toBeNull();
+    expect(record?.userId).toBe(userId);
+    expect(record?.workDate.toISOString()).toBe(workDateIso);
+    expect(record?.punchEvents).toHaveLength(2);
+    expect(record?.punchEvents[0].punchType).toBe('CLOCK_IN');
+    expect(record?.punchEvents[0].occurredAt.toISOString()).toBe(
+      clockInOccurredAtIso,
+    );
+    expect(record?.punchEvents[1].punchType).toBe('CLOCK_OUT');
+    expect(record?.punchEvents[1].occurredAt.toISOString()).toBe(
+      clockOutOccurredAtIso,
+    );
+    expect(record?.punchEvents[1].source).toBe('NORMAL');
+  });
+
+  it('異常系: clock-outで出勤記録が存在しない場合は404で返る', async () => {
+    const userId = ulid();
+    const workDateIso = '2026-01-14T00:00:00.000Z';
+    const occurredAtIso = '2026-01-14T18:00:00.000Z';
+
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
+    const res = await request(httpServer as never)
+      .post('/attendance-record/clock-out')
+      .send({
+        userId,
+        workDate: workDateIso,
+        occurredAt: occurredAtIso,
+      })
+      .expect(404);
+
+    const body: unknown = res.body;
+    expect(body).toMatchObject({
+      statusCode: 404,
+    });
+
+    if (typeof body !== 'object' || body === null || !('message' in body)) {
+      throw new Error('レスポンスボディに message がありません');
+    }
+    expect(String((body as { message: unknown }).message)).toContain(
+      '勤怠記録',
+    );
+  });
+
+  it('異常系: clock-outでuserIdが空文字の場合は400で返る', async () => {
+    const workDateIso = '2026-01-15T00:00:00.000Z';
+    const occurredAtIso = '2026-01-15T18:00:00.000Z';
+
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
+    const res = await request(httpServer as never)
+      .post('/attendance-record/clock-out')
+      .send({
+        userId: '',
+        workDate: workDateIso,
+        occurredAt: occurredAtIso,
+      })
+      .expect(400);
+
+    const body: unknown = res.body;
+    expect(body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+    });
+
+    if (typeof body !== 'object' || body === null || !('message' in body)) {
+      throw new Error('レスポンスボディに message がありません');
+    }
+    expect(String((body as { message: unknown }).message)).toContain(
+      'userId: ユーザーIDは必須です',
+    );
+  });
 });

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { EntityId } from 'src/command/domain/entity-id.vo';
 import { ATTENDANCE_RECORD } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import { formatDateToISOString } from 'src/common/utils/date.utils';
+import { ATTENDANCE_RECORD_REPOSITORY } from '../../domain/attendance-record/attendance-record.tokens';
 
 export type ClockOutAttendanceRecordParams = {
   userId: string;
@@ -14,6 +15,7 @@ export type ClockOutAttendanceRecordParams = {
 @Injectable()
 export class ClockOutAttendanceRecordUseCase {
   constructor(
+    @Inject(ATTENDANCE_RECORD_REPOSITORY)
     private readonly attendanceRecordRepository: IAttendanceRecordRepository,
   ) {}
 
