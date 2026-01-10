@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AttendanceRecordController } from 'src/command/controller/attendance-record/attendance-record-controller';
-import { ATTENDANCE_RECORD_REPOSITORY } from 'src/command/domain/attendance-record/attendance-record.tokens';
-import { AttendanceRecordRepositoryPrisma } from 'src/command/infra/attendance-record.repository.prisma';
-import { ClockInAttendanceRecordUseCase } from 'src/command/useCase/attendance-record/clock-in-attendance-record.use-case';
+import { AttendanceRecordController } from './controller/attendance-record/attendance-record-controller';
+import { ATTENDANCE_RECORD_REPOSITORY } from './domain/attendance-record/attendance-record.tokens';
+import { AttendanceRecordRepositoryPrisma } from './infra/attendance-record.repository.prisma';
+import { ClockInAttendanceRecordUseCase } from './useCase/attendance-record/clock-in-attendance-record.use-case';
 
 @Module({
   controllers: [AttendanceRecordController],
