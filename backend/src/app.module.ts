@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggerModule } from './config/logger.module';
+import { AttendanceRecordModule } from './command/attendance-record.module';
 
 @Module({
-  imports: [LoggerModule, PrismaModule],
+  imports: [LoggerModule, PrismaModule, AttendanceRecordModule],
   controllers: [],
   providers: [],
 })
