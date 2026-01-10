@@ -6,6 +6,7 @@ import { AppModule } from 'src/app.module';
 import { GlobalExceptionFilter } from 'src/common/filters/global-exception.filter';
 import { CustomLoggerService } from 'src/config/custom-logger.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { parseISOString } from 'src/common/utils/date.utils';
 
 const describeDb = process.env.RUN_DB_TESTS === '1' ? describe : describe.skip;
 
@@ -54,7 +55,7 @@ describeDb('AttendanceRecordController (integration)', () => {
     const workDateIso = '2026-01-10T00:00:00.000Z';
     const occurredAtIso = '2026-01-10T09:00:00.000Z';
 
-    // supertest の型定義上 request(...) の引数型が厳しいため、httpServer の型を明示して渡す
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
     await request(httpServer as never)
       .post('/attendance-record/clock-in')
       .send({
@@ -68,7 +69,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       where: {
         userId_workDate: {
           userId,
-          workDate: new Date(workDateIso),
+          workDate: parseISOString(workDateIso),
         },
       },
       include: {
@@ -97,10 +98,11 @@ describeDb('AttendanceRecordController (integration)', () => {
       data: {
         id: existingRecordId,
         userId,
-        workDate: new Date(workDateIso),
+        workDate: parseISOString(workDateIso),
       },
     });
 
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
     await request(httpServer as never)
       .post('/attendance-record/clock-in')
       .send({
@@ -114,7 +116,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       where: {
         userId_workDate: {
           userId,
-          workDate: new Date(workDateIso),
+          workDate: parseISOString(workDateIso),
         },
       },
       include: {
@@ -134,6 +136,7 @@ describeDb('AttendanceRecordController (integration)', () => {
     const workDateIso = '2026-01-12T00:00:00.000Z';
     const occurredAtIso = '2026-01-12T09:00:00.000Z';
 
+    // supertest の型定義が厳密なため、httpServer を never にキャスト
     const res = await request(httpServer as never)
       .post('/attendance-record/clock-in')
       .send({
