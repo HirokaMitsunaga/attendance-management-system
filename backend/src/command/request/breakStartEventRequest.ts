@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { INVALID_FORMAT, REQUIRED_FIELD } from '../../common/constants';
 import { dateFromJsonSchema } from '../../common/utils/zod-helpers';
 
-export const clockInEventRequestSchema = z.object({
+export const breakStartEventRequestSchema = z.object({
   userId: z
     .string()
     .min(1, REQUIRED_FIELD('ユーザーID'))
@@ -11,4 +11,6 @@ export const clockInEventRequestSchema = z.object({
   occurredAt: dateFromJsonSchema('打刻日時'),
 });
 
-export type ClockInEventRequestDto = z.infer<typeof clockInEventRequestSchema>;
+export type BreakStartEventRequestDto = z.infer<
+  typeof breakStartEventRequestSchema
+>;
