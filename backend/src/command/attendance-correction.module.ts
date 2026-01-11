@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AttendanceRecordModule } from './attendance-record.module';
+import { AttendanceRuleModule } from './attendance-rule.module';
 import { AttendanceCorrectionRequestController } from './controller/attendance-correction/attendance-correction-request-controller';
 import { AttendanceCorrectionResubmitController } from './controller/attendance-correction/attendance-correction-resubmit-controller';
 import { AttendanceCorrectionActionController } from './controller/attendance-correction/attendance-correction-action-controller';
@@ -18,7 +19,7 @@ import { ResubmitClockInAttendanceCorrectionUseCase } from './useCase/attendance
 import { ResubmitClockOutAttendanceCorrectionUseCase } from './useCase/attendance-correction/resubmit/resubmit-clock-out-attendance-correction.use-case';
 
 @Module({
-  imports: [AttendanceRecordModule],
+  imports: [AttendanceRecordModule, AttendanceRuleModule],
   controllers: [
     AttendanceCorrectionRequestController,
     AttendanceCorrectionResubmitController,

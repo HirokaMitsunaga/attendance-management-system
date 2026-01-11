@@ -37,6 +37,53 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
     // テスト前に必ずデータベースをクリーンアップ
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
+
+    // 有効な勤怠ルールを作成（すべての打刻タイプに対応）
+    await prisma.attendanceRule.createMany({
+      data: [
+        {
+          id: ulid(),
+          targets: ['CLOCK_IN'],
+          type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+            latestClockInTime: '23:59',
+          },
+          enabled: true,
+        },
+        {
+          id: ulid(),
+          targets: ['CLOCK_OUT'],
+          type: 'ALLOW_CLOCK_OUT_ONLY_AFTER_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_OUT_ONLY_AFTER_TIME',
+            earliestClockOutTime: '00:00',
+          },
+          enabled: true,
+        },
+        {
+          id: ulid(),
+          targets: ['BREAK_START'],
+          type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+            latestClockInTime: '23:59',
+          },
+          enabled: true,
+        },
+        {
+          id: ulid(),
+          targets: ['BREAK_END'],
+          type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+            latestClockInTime: '23:59',
+          },
+          enabled: true,
+        },
+      ],
+    });
   });
 
   afterEach(async () => {
@@ -44,6 +91,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
     // テスト後にも必ずクリーンアップ（並列実行や異常終了時の影響を低減）
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
   });
 
   afterAll(async () => {

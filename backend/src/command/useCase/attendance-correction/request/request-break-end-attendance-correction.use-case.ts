@@ -4,9 +4,13 @@ import { AttendanceCorrection } from 'src/command/domain/attendance-correction/a
 import { PUNCH_TYPE } from 'src/command/domain/common/punch/punch-type';
 import { EntityId } from 'src/command/domain/entity-id.vo';
 import { ATTENDANCE_CORRECTION_REPOSITORY } from 'src/command/domain/attendance-correction/attendance-correction.tokens';
-import { ATTENDANCE_CORRECTION } from 'src/common/constants';
+import { ATTENDANCE_CORRECTION, ATTENDANCE_RULE } from 'src/common/constants';
 import { DomainError } from 'src/common/errors/domain.error';
+import { NotFoundError } from 'src/common/errors/not-found.error';
 import { getCurrentDate } from 'src/common/utils/date.utils';
+import type { IAttendanceRuleRepository } from 'src/command/domain/attendance-rule/attendance-rule-repository.interface';
+import { ATTENDANCE_RULE_REPOSITORY } from 'src/command/domain/attendance-rule/attendance-rule.tokens';
+import { AttendanceRulePolicy } from 'src/command/domain/attendance-rule-policy/attendance-rule-policy';
 
 export type RequestBreakEndAttendanceCorrectionParams = {
   userId: string;
@@ -20,6 +24,8 @@ export class RequestBreakEndAttendanceCorrectionUseCase {
   constructor(
     @Inject(ATTENDANCE_CORRECTION_REPOSITORY)
     private readonly attendanceCorrectionRepository: IAttendanceCorrectionRepository,
+    @Inject(ATTENDANCE_RULE_REPOSITORY)
+    private readonly attendanceRuleRepository: IAttendanceRuleRepository,
   ) {}
 
   async execute(
@@ -36,6 +42,18 @@ export class RequestBreakEndAttendanceCorrectionUseCase {
     if (existing) {
       throw new DomainError(ATTENDANCE_CORRECTION.ALREADY_EXISTS);
     }
+
+    // 勤怠ルールの取得と検証
+    const rules = await this.attendanceRuleRepository.findAllEnabled();
+    if (rules.length === 0) {
+      throw new NotFoundError(ATTENDANCE_RULE.NO_ENABLED_RULES);
+    }
+
+    const rulePolicy = new AttendanceRulePolicy();
+    rulePolicy.ensureCanBreakEnd({
+      rules,
+      occurredAt: params.occurredAt,
+    });
 
     const correction = AttendanceCorrection.create({
       userId,

@@ -38,4 +38,5 @@ export const ATTENDANCE_RECORD = {
 
 export const ATTENDANCE_RULE = {
   NOT_FOUND: '勤怠ルール',
+  NO_ENABLED_RULES: '有効な勤怠ルール',
 } as const;
