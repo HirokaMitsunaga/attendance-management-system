@@ -19,5 +19,6 @@ import { BreakEndAttendanceRecordUseCase } from './useCase/attendance-record/bre
       useClass: AttendanceRecordRepositoryPrisma,
     },
   ],
+  exports: [ATTENDANCE_RECORD_REPOSITORY],
 })
 export class AttendanceRecordModule {}
