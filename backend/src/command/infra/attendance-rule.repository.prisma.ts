@@ -32,6 +32,22 @@ export class AttendanceRuleRepositoryPrisma
     });
   }
 
+  async findAllEnabled(): Promise<AttendanceRule[]> {
+    const rules = await this.prisma.attendanceRule.findMany({
+      where: { enabled: true },
+    });
+
+    return rules.map((rule) =>
+      AttendanceRule.reconstruct({
+        id: EntityId.reconstruct({ entityId: rule.id }),
+        targets: rule.targets,
+        type: rule.type,
+        setting: this.toRuleSetting(rule.setting),
+        enabled: rule.enabled,
+      }),
+    );
+  }
+
   async create(params: { rule: AttendanceRule }): Promise<void> {
     const { rule } = params;
     await this.prisma.attendanceRule.create({
