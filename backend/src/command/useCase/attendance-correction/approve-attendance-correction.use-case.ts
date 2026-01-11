@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { IAttendanceCorrectionRepository } from 'src/command/domain/attendance-correction/attendance-correction-repository.interface';
 import type { IAttendanceRecordRepository } from 'src/command/domain/attendance-record/attendance-record-repository.interface';
 import { AttendanceCorrectionApproval } from 'src/command/domain/attendance-correction/attendance-correction-approval';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_CORRECTION_REPOSITORY } from 'src/command/domain/attendance-correction/attendance-correction.tokens';
+import { ATTENDANCE_RECORD_REPOSITORY } from 'src/command/domain/attendance-record/attendance-record.tokens';
 import { ATTENDANCE_CORRECTION, ATTENDANCE_RECORD } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import { formatDateToISOString } from 'src/common/utils/date.utils';
@@ -17,7 +19,9 @@ export type ApproveAttendanceCorrectionParams = {
 @Injectable()
 export class ApproveAttendanceCorrectionUseCase {
   constructor(
+    @Inject(ATTENDANCE_CORRECTION_REPOSITORY)
     private readonly attendanceCorrectionRepository: IAttendanceCorrectionRepository,
+    @Inject(ATTENDANCE_RECORD_REPOSITORY)
     private readonly attendanceRecordRepository: IAttendanceRecordRepository,
   ) {}
 

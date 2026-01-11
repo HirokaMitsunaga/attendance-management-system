@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { IAttendanceCorrectionRepository } from 'src/command/domain/attendance-correction/attendance-correction-repository.interface';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_CORRECTION_REPOSITORY } from 'src/command/domain/attendance-correction/attendance-correction.tokens';
 import { ATTENDANCE_CORRECTION } from 'src/common/constants';
 import { NotFoundError } from 'src/common/errors/not-found.error';
 import {
@@ -18,6 +19,7 @@ export type RejectAttendanceCorrectionParams = {
 @Injectable()
 export class RejectAttendanceCorrectionUseCase {
   constructor(
+    @Inject(ATTENDANCE_CORRECTION_REPOSITORY)
     private readonly attendanceCorrectionRepository: IAttendanceCorrectionRepository,
   ) {}
 
