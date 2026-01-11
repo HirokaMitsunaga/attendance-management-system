@@ -35,3 +35,7 @@ export const ATTENDANCE_CORRECTION = {
 export const ATTENDANCE_RECORD = {
   NOT_FOUND: '勤怠記録',
 } as const;
+
+export const ATTENDANCE_RULE = {
+  NOT_FOUND: '勤怠ルール',
+} as const;

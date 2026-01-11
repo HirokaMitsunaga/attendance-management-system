@@ -34,14 +34,26 @@ enum AttendanceCorrectionEventType {
   CANCELED
 }
 
-model AttendanceRecord {
-  id        String            @id
-  userId    String
-  workDate  DateTime
-  punchEvents   AttendancePunchEvent[]
+enum RuleTargetAction {
+  CLOCK_IN
+  CLOCK_OUT
+  BREAK_START
+  BREAK_END
+}
 
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+enum RuleType {
+  ALLOW_CLOCK_IN_ONLY_BEFORE_TIME
+  ALLOW_CLOCK_OUT_ONLY_AFTER_TIME
+}
+
+model AttendanceRecord {
+  id          String                 @id @default(ulid())
+  userId      String
+  workDate    DateTime
+  punchEvents AttendancePunchEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, workDate])
   @@map("attendance_records")
@@ -49,21 +61,16 @@ model AttendanceRecord {
 
 //勤怠の事実をそのままイベントとして持っているため(状態遷移するわけではない)
 model AttendancePunchEvent {
-  id                 String        @id @default(ulid())
+  id                 String           @id @default(ulid())
   attendanceRecordId String
   attendanceRecord   AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
 
   punchType  PunchType
   occurredAt DateTime
-  createdAt  DateTime      @default(now())
+  createdAt  DateTime  @default(now())
 
-  source     PunchSource
-  sourceId   String?       // PunchSourceがCORRECTION の場合だけ埋める（通常はnull）
-
-  @@index([attendanceRecordId, occurredAt])
-  @@index([attendanceRecordId, createdAt])
-  @@index([source, sourceId])
-  @@map("attendance_punch_events")
+  source   PunchSource
+  sourceId String? // PunchSourceがCORRECTION の場合だけ埋める（通常はnull）
 
   // NOTE:
   // 冪等性をDBで強く担保したい場合、
@@ -74,14 +81,20 @@ model AttendancePunchEvent {
   // CREATE UNIQUE INDEX attendance_punches_correction_unique
   // ON attendance_punches (source, source_id, punch_type)
   // WHERE source = 'CORRECTION';
-}
-model AttendanceCorrection {
-  id       String                    @id @default(ulid())
-  userId   String
-  workDate DateTime                  // 可能なら @db.Date を検討（「日」ならDateが安全）
-  reason   String                    // 申請理由（必要ならREQUESTEDイベントのreasonと同じにする）
 
-  events   AttendanceCorrectionEvent[]
+  @@index([attendanceRecordId, occurredAt])
+  @@index([attendanceRecordId, createdAt])
+  @@index([source, sourceId])
+  @@map("attendance_punch_events")
+}
+
+model AttendanceCorrection {
+  id       String   @id @default(ulid())
+  userId   String
+  workDate DateTime // 可能なら @db.Date を検討（「日」ならDateが安全）
+  reason   String // 申請理由（必要ならREQUESTEDイベントのreasonと同じにする）
+
+  events AttendanceCorrectionEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,16 +104,16 @@ model AttendanceCorrection {
 }
 
 model AttendanceCorrectionEvent {
-  id                    String                     @id @default(ulid())
+  id                     String               @id @default(ulid())
   attendanceCorrectionId String
-  attendanceCorrection   AttendanceCorrection      @relation(fields: [attendanceCorrectionId], references: [id], onDelete: Cascade)
+  attendanceCorrection   AttendanceCorrection @relation(fields: [attendanceCorrectionId], references: [id], onDelete: Cascade)
 
-  type       AttendanceCorrectionEventType
-  occurredAt DateTime   // REQUESTEDのrequestedAt / APPROVEDのapprovedAt / REJECTEDのrejectedAt / CANCELEDのcanceledAt
-  actorUserId String    // requestedBy / approvedBy / rejectedBy / canceledBy
+  type        AttendanceCorrectionEventType
+  occurredAt  DateTime // REQUESTEDのrequestedAt / APPROVEDのapprovedAt / REJECTEDのrejectedAt / CANCELEDのcanceledAt
+  actorUserId String // requestedBy / approvedBy / rejectedBy / canceledBy
 
-  reason  String?       // REQUESTED / 再申請時のみ
-  comment String?       // REJECTED時のみ
+  reason  String? // REQUESTED / 再申請時のみ
+  comment String? // REJECTED時のみ
 
   // 修正対象のPunch群（将来の複数対応のためJsonで保持）
   // 例: [{ "punchType": "CLOCK_IN", "occurredAt": "2024-01-15T01:05:00.000Z" }]
@@ -111,4 +124,17 @@ model AttendanceCorrectionEvent {
   @@index([attendanceCorrectionId, createdAt])
   @@index([attendanceCorrectionId, type])
   @@map("attendance_correction_events")
+}
+
+model AttendanceRule {
+  id        String             @id @default(ulid())
+  targets   RuleTargetAction[]
+  type      RuleType
+  setting   Json
+  enabled   Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([enabled, type])
+  @@map("attendance_rules")
 }
