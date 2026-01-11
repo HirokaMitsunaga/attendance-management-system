@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EntityId } from '../domain/entity-id.vo';
 import { AttendanceRule } from '../domain/attendance-rule/attendance-rule.entity';
 import { type RuleSetting } from '../domain/attendance-rule/attendance-rule-setting';
 import { type IAttendanceRuleRepository } from '../domain/attendance-rule/attendance-rule-repository.interface';
+import { NotFoundError } from '../../common/errors/not-found.error';
 
 @Injectable()
 export class AttendanceRuleRepositoryPrisma
@@ -44,22 +46,42 @@ export class AttendanceRuleRepositoryPrisma
 
   async update(params: { rule: AttendanceRule }): Promise<void> {
     const { rule } = params;
-    await this.prisma.attendanceRule.update({
-      where: { id: rule.getId() },
-      data: {
-        targets: rule.getTargets(),
-        type: rule.getType(),
-        setting: this.toPrismaSetting(rule.getSetting()),
-        enabled: rule.isEnabled(),
-      },
-    });
+    try {
+      await this.prisma.attendanceRule.update({
+        where: { id: rule.getId() },
+        data: {
+          targets: rule.getTargets(),
+          type: rule.getType(),
+          setting: this.toPrismaSetting(rule.getSetting()),
+          enabled: rule.isEnabled(),
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundError('勤怠ルール', rule.getId());
+      }
+      throw error;
+    }
   }
 
   async delete(params: { rule: AttendanceRule }): Promise<void> {
     const { rule } = params;
-    await this.prisma.attendanceRule.delete({
-      where: { id: rule.getId() },
-    });
+    try {
+      await this.prisma.attendanceRule.delete({
+        where: { id: rule.getId() },
+      });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundError('勤怠ルール', rule.getId());
+      }
+      throw error;
+    }
   }
 
   /**
