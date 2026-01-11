@@ -4,9 +4,10 @@ import { AttendanceRuleRepositoryPrisma } from './infra/attendance-rule.reposito
 import { CreateAttendanceRuleUseCase } from './useCase/attendance-rule/create-attendance-rule.use-case';
 import { UpdateAttendanceRuleUseCase } from './useCase/attendance-rule/update-attendance-rule.use-case';
 import { DeleteAttendanceRuleUseCase } from './useCase/attendance-rule/delete-attendance-rule.use-case';
+import { AttendanceRuleController } from './controller/attendance-rule/attendance-rule-controller';
 
 @Module({
-  controllers: [],
+  controllers: [AttendanceRuleController],
   providers: [
     CreateAttendanceRuleUseCase,
     UpdateAttendanceRuleUseCase,
