@@ -38,5 +38,8 @@
   "git.ignoreLimitWarning": true,
   "i18n-ally.localesPaths": ["/locales", "/frontend/locales"],
   "i18n-ally.enabledFrameworks": ["nestjs", "next"],
-  "files.autoSave": "onFocusChange"
+  "files.autoSave": "onFocusChange",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }
