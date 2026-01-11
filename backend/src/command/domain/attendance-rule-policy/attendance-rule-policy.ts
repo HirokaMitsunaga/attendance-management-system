@@ -51,6 +51,62 @@ export class AttendanceRulePolicy {
     }
   }
 
+  public ensureCanBreakStart(params: {
+    rules: AttendanceRule[];
+    occurredAt: Date;
+  }): void {
+    const applicable = this.getApplicableRules(
+      params.rules,
+      RULE_TARGET_ACTION.BREAK_START,
+    );
+
+    for (const rule of applicable) {
+      const setting = rule.getSetting();
+      if (setting.type === RULE_TYPE.ALLOW_CLOCK_IN_ONLY_BEFORE_TIME) {
+        const { latestClockInTime } = setting;
+        if (!isBeforeOrEqual(params.occurredAt, latestClockInTime)) {
+          throw new DomainError(`休憩開始は${latestClockInTime}までです`);
+        }
+      }
+      if (setting.type === RULE_TYPE.ALLOW_CLOCK_OUT_ONLY_AFTER_TIME) {
+        const { earliestClockOutTime } = setting;
+        if (!isAfterOrEqual(params.occurredAt, earliestClockOutTime)) {
+          throw new DomainError(
+            `休憩開始は${earliestClockOutTime}以降に可能です`,
+          );
+        }
+      }
+    }
+  }
+
+  public ensureCanBreakEnd(params: {
+    rules: AttendanceRule[];
+    occurredAt: Date;
+  }): void {
+    const applicable = this.getApplicableRules(
+      params.rules,
+      RULE_TARGET_ACTION.BREAK_END,
+    );
+
+    for (const rule of applicable) {
+      const setting = rule.getSetting();
+      if (setting.type === RULE_TYPE.ALLOW_CLOCK_IN_ONLY_BEFORE_TIME) {
+        const { latestClockInTime } = setting;
+        if (!isBeforeOrEqual(params.occurredAt, latestClockInTime)) {
+          throw new DomainError(`休憩終了は${latestClockInTime}までです`);
+        }
+      }
+      if (setting.type === RULE_TYPE.ALLOW_CLOCK_OUT_ONLY_AFTER_TIME) {
+        const { earliestClockOutTime } = setting;
+        if (!isAfterOrEqual(params.occurredAt, earliestClockOutTime)) {
+          throw new DomainError(
+            `休憩終了は${earliestClockOutTime}以降に可能です`,
+          );
+        }
+      }
+    }
+  }
+
   //有効になっているルールかつ、出勤や退勤のどのルールなのかをフィルタリングする
   private getApplicableRules(
     rules: AttendanceRule[],
