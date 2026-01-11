@@ -3,6 +3,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { LoggerModule } from './config/logger.module';
 import { AttendanceRecordModule } from './command/attendance-record.module';
 import { AttendanceCorrectionModule } from './command/attendance-correction.module';
+import { AttendanceRuleModule } from './command/attendance-rule.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { AttendanceCorrectionModule } from './command/attendance-correction.modu
     PrismaModule,
     AttendanceRecordModule,
     AttendanceCorrectionModule,
+    AttendanceRuleModule,
   ],
   controllers: [],
   providers: [],
