@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { IAttendanceCorrectionRepository } from 'src/command/domain/attendance-correction/attendance-correction-repository.interface';
 import { AttendanceCorrection } from 'src/command/domain/attendance-correction/attendance-correction.entity';
 import { PUNCH_TYPE } from 'src/command/domain/common/punch/punch-type';
 import { EntityId } from 'src/command/domain/entity-id.vo';
+import { ATTENDANCE_CORRECTION_REPOSITORY } from 'src/command/domain/attendance-correction/attendance-correction.tokens';
 import { ATTENDANCE_CORRECTION } from 'src/common/constants';
 import { DomainError } from 'src/common/errors/domain.error';
 import { getCurrentDate } from 'src/common/utils/date.utils';
@@ -17,6 +18,7 @@ export type RequestBreakStartAttendanceCorrectionParams = {
 @Injectable()
 export class RequestBreakStartAttendanceCorrectionUseCase {
   constructor(
+    @Inject(ATTENDANCE_CORRECTION_REPOSITORY)
     private readonly attendanceCorrectionRepository: IAttendanceCorrectionRepository,
   ) {}
 
