@@ -7,6 +7,7 @@ import { AttendanceRule } from '../domain/attendance-rule/attendance-rule.entity
 import { type RuleSetting } from '../domain/attendance-rule/attendance-rule-setting';
 import { type IAttendanceRuleRepository } from '../domain/attendance-rule/attendance-rule-repository.interface';
 import { NotFoundError } from '../../common/errors/not-found.error';
+import { ATTENDANCE_RULE } from '../../common/constants/business-error';
 
 @Injectable()
 export class AttendanceRuleRepositoryPrisma
@@ -56,14 +57,14 @@ export class AttendanceRuleRepositoryPrisma
           enabled: rule.isEnabled(),
         },
       });
-    } catch (error) {
+    } catch (err) {
       if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2025'
+        err instanceof PrismaClientKnownRequestError &&
+        err.code === 'P2025'
       ) {
-        throw new NotFoundError('勤怠ルール', rule.getId());
+        throw new NotFoundError(ATTENDANCE_RULE.NOT_FOUND, rule.getId());
       }
-      throw error;
+      throw err;
     }
   }
 
@@ -73,14 +74,14 @@ export class AttendanceRuleRepositoryPrisma
       await this.prisma.attendanceRule.delete({
         where: { id: rule.getId() },
       });
-    } catch (error) {
+    } catch (err) {
       if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2025'
+        err instanceof PrismaClientKnownRequestError &&
+        err.code === 'P2025'
       ) {
-        throw new NotFoundError('勤怠ルール', rule.getId());
+        throw new NotFoundError(ATTENDANCE_RULE.NOT_FOUND, rule.getId());
       }
-      throw error;
+      throw err;
     }
   }
 
