@@ -12,10 +12,11 @@
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build"
   },
-  "dependencies": {
+  "peerDependencies": {
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "zod": "^4.1.13",
     "typescript": "^5.7.3"
   }
 }

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod';
 
 export const ATTENDANCE_STATUS = {
   NOT_STARTED: 'NOT_STARTED',
@@ -44,19 +44,22 @@ const requiredField = (fieldName: string): string => `${fieldName}は必須で�
 const invalidFormat = (fieldName: string): string =>
   `${fieldName}の形式が正しくありません`;
 
-const parseISOString = (dateString: string): Date => new Date(dateString);
+const parseDateFromString = (value: string): Date | null => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
 
 const dateFromJsonSchema = (fieldLabel: string) =>
   z
-    .preprocess(
-      (value) => (typeof value === 'string' ? parseISOString(value) : value),
-      z.date({
-        required_error: requiredField(fieldLabel),
-        invalid_type_error: invalidFormat(fieldLabel),
-      }),
-    )
-    .refine((date) => !Number.isNaN(date.getTime()), {
-      message: invalidFormat(fieldLabel),
+    .string()
+    .min(1, requiredField(fieldLabel))
+    .transform((value, ctx) => {
+      const date = parseDateFromString(value);
+      if (!date) {
+        ctx.addIssue({ code: 'custom', message: invalidFormat(fieldLabel) });
+        return z.NEVER;
+      }
+      return date;
     });
 
 export const clockInEventRequestSchema = z.object({
