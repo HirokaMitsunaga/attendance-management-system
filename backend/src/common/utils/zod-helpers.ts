@@ -14,8 +14,10 @@ export const dateFromJsonSchema = (fieldLabel: string) =>
     .preprocess(
       (value) => (typeof value === 'string' ? parseISOString(value) : value),
       z.date({
-        required_error: REQUIRED_FIELD(fieldLabel),
-        invalid_type_error: INVALID_FORMAT(fieldLabel),
+        error: (issue) =>
+          issue.inst === undefined
+            ? REQUIRED_FIELD(fieldLabel)
+            : INVALID_FORMAT(fieldLabel),
       }),
     )
     .refine((date) => !Number.isNaN(date.getTime()), {
