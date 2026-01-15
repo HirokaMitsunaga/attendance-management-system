@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { INVALID_FORMAT, REQUIRED_FIELD } from '../../common/constants';
-import { dateFromJsonSchema } from '../../common/utils/zod-helpers';
+import { workDateFromJsonSchema } from '../../common/utils/zod-helpers';
 
 export const approveAttendanceCorrectionRequestSchema = z.object({
   userId: z
     .string()
     .min(1, REQUIRED_FIELD('ユーザーID'))
     .ulid({ message: INVALID_FORMAT('ユーザーID') }),
-  workDate: dateFromJsonSchema('勤務日'),
+  workDate: workDateFromJsonSchema('勤務日'),
 });
 
 export type ApproveAttendanceCorrectionRequestDto = z.infer<
