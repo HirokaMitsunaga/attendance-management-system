@@ -36,7 +36,7 @@ export type PunchEventDto = {
 export type AttendanceRecordDto = {
   id: string;
   userId: string;
-  workDate: string;
+  workDate: WorkDateDto;
   punchEvents: PunchEventDto[];
 };
 
@@ -44,46 +44,92 @@ const requiredField = (fieldName: string): string => `${fieldName}は必須で�
 const invalidFormat = (fieldName: string): string =>
   `${fieldName}の形式が正しくありません`;
 
-const parseDateFromString = (value: string): Date | null => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+const workDateDtoSchema = z
+  .iso.date({ message: invalidFormat('勤務日') })
+  .min(1, requiredField('勤務日'));
 
-const dateFromJsonSchema = (fieldLabel: string) =>
+export type WorkDateDto = z.infer<typeof workDateDtoSchema>;
+
+const workDateAsDateSchema = (fieldLabel: string) =>
   z
-    .string()
+    .iso.date({ message: invalidFormat(fieldLabel) })
     .min(1, requiredField(fieldLabel))
     .transform((value, ctx) => {
-      const date = parseDateFromString(value);
-      if (!date) {
+      const date = new Date(`${value}T00:00:00.000Z`);
+      if (
+        Number.isNaN(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== value
+      ) {
         ctx.addIssue({ code: 'custom', message: invalidFormat(fieldLabel) });
         return z.NEVER;
       }
       return date;
     });
 
+const occurredAtAsDateSchema = (fieldLabel: string) =>
+  z
+    .string()
+    .min(1, requiredField(fieldLabel))
+    .datetime({ message: invalidFormat(fieldLabel) })
+    .transform((value, ctx) => {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        ctx.addIssue({ code: 'custom', message: invalidFormat(fieldLabel) });
+        return z.NEVER;
+      }
+      return date;
+    });
+
+const occurredAtDtoSchema = z
+  .string()
+  .min(1, requiredField('打刻日時'))
+  .datetime({ message: invalidFormat('打刻日時') });
+
+export const clockInEventRequestBodySchema = z.object({
+  userId: z
+    .string()
+    .min(1, requiredField('ユーザーID'))
+    .ulid({ message: invalidFormat('ユーザーID') }),
+  workDate: workDateDtoSchema,
+  occurredAt: occurredAtDtoSchema,
+});
+
+export type ClockInEventRequestBodyDto = z.infer<
+  typeof clockInEventRequestBodySchema
+>;
+
 export const clockInEventRequestSchema = z.object({
   userId: z
     .string()
     .min(1, requiredField('ユーザーID'))
     .ulid({ message: invalidFormat('ユーザーID') }),
-  workDate: dateFromJsonSchema('勤務日'),
-  occurredAt: dateFromJsonSchema('打刻日時'),
+  workDate: workDateAsDateSchema('勤務日'),
+  occurredAt: occurredAtAsDateSchema('打刻日時'),
 });
 
 export type ClockInEventRequestDto = z.infer<typeof clockInEventRequestSchema>;
+
+export const clockOutEventRequestBodySchema = clockInEventRequestBodySchema;
+export type ClockOutEventRequestBodyDto = z.infer<
+  typeof clockOutEventRequestBodySchema
+>;
 
 export const clockOutEventRequestSchema = z.object({
   userId: z
     .string()
     .min(1, requiredField('ユーザーID'))
     .ulid({ message: invalidFormat('ユーザーID') }),
-  workDate: dateFromJsonSchema('勤務日'),
-  occurredAt: dateFromJsonSchema('打刻日時'),
+  workDate: workDateAsDateSchema('勤務日'),
+  occurredAt: occurredAtAsDateSchema('打刻日時'),
 });
 
 export type ClockOutEventRequestDto = z.infer<
   typeof clockOutEventRequestSchema
+>;
+
+export const breakStartEventRequestBodySchema = clockInEventRequestBodySchema;
+export type BreakStartEventRequestBodyDto = z.infer<
+  typeof breakStartEventRequestBodySchema
 >;
 
 export const breakStartEventRequestSchema = z.object({
@@ -91,12 +137,17 @@ export const breakStartEventRequestSchema = z.object({
     .string()
     .min(1, requiredField('ユーザーID'))
     .ulid({ message: invalidFormat('ユーザーID') }),
-  workDate: dateFromJsonSchema('勤務日'),
-  occurredAt: dateFromJsonSchema('打刻日時'),
+  workDate: workDateAsDateSchema('勤務日'),
+  occurredAt: occurredAtAsDateSchema('打刻日時'),
 });
 
 export type BreakStartEventRequestDto = z.infer<
   typeof breakStartEventRequestSchema
+>;
+
+export const breakEndEventRequestBodySchema = clockInEventRequestBodySchema;
+export type BreakEndEventRequestBodyDto = z.infer<
+  typeof breakEndEventRequestBodySchema
 >;
 
 export const breakEndEventRequestSchema = z.object({
@@ -104,8 +155,10 @@ export const breakEndEventRequestSchema = z.object({
     .string()
     .min(1, requiredField('ユーザーID'))
     .ulid({ message: invalidFormat('ユーザーID') }),
-  workDate: dateFromJsonSchema('勤務日'),
-  occurredAt: dateFromJsonSchema('打刻日時'),
+  workDate: workDateAsDateSchema('勤務日'),
+  occurredAt: occurredAtAsDateSchema('打刻日時'),
 });
 
-export type BreakEndEventRequestDto = z.infer<typeof breakEndEventRequestSchema>;
+export type BreakEndEventRequestDto = z.infer<
+  typeof breakEndEventRequestSchema
+>;
