@@ -21,3 +21,23 @@ export const dateFromJsonSchema = (fieldLabel: string) =>
     .refine((date) => !Number.isNaN(date.getTime()), {
       message: INVALID_FORMAT(fieldLabel),
     });
+
+/**
+ * YYYY-MM-DD 形式のJSON文字列からDateオブジェクトへの変換とバリデーションを行うZodスキーマ
+ * DBは DATE を想定し、UTCの0時に正規化する。
+ */
+export const workDateFromJsonSchema = (fieldLabel: string) =>
+  z.iso
+    .date({ message: INVALID_FORMAT(fieldLabel) })
+    .min(1, REQUIRED_FIELD(fieldLabel))
+    .transform((value, ctx) => {
+      const date = parseISOString(`${value}T00:00:00.000Z`);
+      if (
+        Number.isNaN(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== value
+      ) {
+        ctx.addIssue({ code: 'custom', message: INVALID_FORMAT(fieldLabel) });
+        return z.NEVER;
+      }
+      return date;
+    });
