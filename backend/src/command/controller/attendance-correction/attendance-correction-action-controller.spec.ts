@@ -38,6 +38,23 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
     await prisma.attendanceRecord.deleteMany();
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
+
+    // 勤怠修正申請（request/*）は勤怠ルールがないと 404 になるため、常に用意する
+    await prisma.attendanceRule.createMany({
+      data: [
+        {
+          id: ulid(),
+          targets: ['CLOCK_IN'],
+          type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+            latestClockInTime: '23:59',
+          },
+          enabled: true,
+        },
+      ],
+    });
   });
 
   afterEach(async () => {
@@ -46,6 +63,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
     await prisma.attendanceRecord.deleteMany();
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
   });
 
   afterAll(async () => {
@@ -55,7 +73,8 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
   it('正常系: approveでAPPROVEDイベントが作成され、勤怠レコードに打刻が反映される', async () => {
     const targetUserId = ulid();
     const approverUserId = ulid();
-    const workDateIso = '2026-01-26T00:00:00.000Z';
+    const workDate = '2026-01-26';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-26T09:00:00.000Z';
 
     // 勤怠修正申請（PENDING）を作成
@@ -63,7 +82,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', targetUserId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: '打刻漏れ',
       })
@@ -83,7 +102,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .set('x-user-id', approverUserId)
       .send({
         userId: targetUserId,
-        workDate: workDateIso,
+        workDate,
       })
       .expect(200);
 
@@ -123,13 +142,14 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
   it('正常系: rejectでREJECTEDイベントが作成される', async () => {
     const targetUserId = ulid();
     const rejectedBy = ulid();
-    const workDateIso = '2026-01-27T00:00:00.000Z';
+    const workDate = '2026-01-27';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
 
     await request(httpServer as never)
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', targetUserId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: '2026-01-27T09:00:00.000Z',
         reason: '打刻漏れ',
       })
@@ -140,7 +160,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .set('x-user-id', rejectedBy)
       .send({
         userId: targetUserId,
-        workDate: workDateIso,
+        workDate,
         comment: '差し戻し理由',
       })
       .expect(200);
@@ -165,13 +185,14 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
   it('正常系: cancelでCANCELEDイベントが作成される', async () => {
     const targetUserId = ulid();
     const canceledBy = ulid();
-    const workDateIso = '2026-01-28T00:00:00.000Z';
+    const workDate = '2026-01-28';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
 
     await request(httpServer as never)
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', targetUserId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: '2026-01-28T09:00:00.000Z',
         reason: '打刻漏れ',
       })
@@ -182,7 +203,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .set('x-user-id', canceledBy)
       .send({
         userId: targetUserId,
-        workDate: workDateIso,
+        workDate,
       })
       .expect(200);
 
@@ -207,7 +228,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .post('/attendance-correction/approve')
       .send({
         userId: '',
-        workDate: '2026-01-29T00:00:00.000Z',
+        workDate: '2026-01-29',
       })
       .expect(400);
 
@@ -227,7 +248,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
       .set('x-user-id', ulid())
       .send({
         userId: ulid(),
-        workDate: '2026-01-30T00:00:00.000Z',
+        workDate: '2026-01-30',
         comment: '差し戻し理由',
       })
       .expect(404);

@@ -100,7 +100,8 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('正常系: request/clock-inで勤怠修正申請（REQUESTEDイベント）が作成される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-10T00:00:00.000Z';
+    const workDate = '2026-01-10';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-10T09:00:00.000Z';
     const reason = '打刻漏れのため';
 
@@ -108,7 +109,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })
@@ -146,7 +147,8 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('正常系: request/clock-outで勤怠修正申請（REQUESTEDイベント）が作成される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-11T00:00:00.000Z';
+    const workDate = '2026-01-11';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-11T18:00:00.000Z';
     const reason = '退勤打刻を忘れたため';
 
@@ -154,7 +156,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/clock-out')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })
@@ -186,7 +188,8 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('正常系: request/break-startで勤怠修正申請（REQUESTEDイベント）が作成される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-12T00:00:00.000Z';
+    const workDate = '2026-01-12';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-12T12:00:00.000Z';
     const reason = '休憩開始の打刻漏れ';
 
@@ -194,7 +197,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/break-start')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })
@@ -226,7 +229,8 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('正常系: request/break-endで勤怠修正申請（REQUESTEDイベント）が作成される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-13T00:00:00.000Z';
+    const workDate = '2026-01-13';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-13T13:00:00.000Z';
     const reason = '休憩終了の打刻漏れ';
 
@@ -234,7 +238,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/break-end')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })
@@ -266,14 +270,14 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('異常系: reasonが空文字の場合は400で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-14T00:00:00.000Z';
+    const workDate = '2026-01-14';
     const occurredAtIso = '2026-01-14T09:00:00.000Z';
 
     const res = await request(httpServer as never)
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: '',
       })
@@ -292,7 +296,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
 
   it('異常系: 同一ユーザー・同一勤務日で既に勤怠修正申請がある場合は400で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-15T00:00:00.000Z';
+    const workDate = '2026-01-15';
     const occurredAtIso = '2026-01-15T09:00:00.000Z';
     const reason = '打刻漏れ';
 
@@ -301,7 +305,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })
@@ -312,7 +316,7 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
       .post('/attendance-correction/request/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason,
       })

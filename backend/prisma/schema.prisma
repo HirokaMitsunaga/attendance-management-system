@@ -49,7 +49,7 @@ enum RuleType {
 model AttendanceRecord {
   id          String                 @id @default(ulid())
   userId      String
-  workDate    DateTime
+  workDate    DateTime               @db.Date
   punchEvents AttendancePunchEvent[]
 
   createdAt DateTime @default(now())

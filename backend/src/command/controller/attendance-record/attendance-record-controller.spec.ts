@@ -52,7 +52,8 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('正常系: clock-inで勤怠レコードと打刻イベントが作成される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-10T00:00:00.000Z';
+    const workDate = '2026-01-10';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-10T09:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -60,7 +61,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-in')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(200);
@@ -90,7 +91,8 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('正常系: 既存勤怠レコードがある場合でもイベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-11T00:00:00.000Z';
+    const workDate = '2026-01-11';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-11T09:00:00.000Z';
     const existingRecordId = ulid();
 
@@ -107,7 +109,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-in')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(200);
@@ -133,7 +135,7 @@ describeDb('AttendanceRecordController (integration)', () => {
   });
 
   it('異常系: userIdが空文字の場合は400で返る', async () => {
-    const workDateIso = '2026-01-12T00:00:00.000Z';
+    const workDate = '2026-01-12';
     const occurredAtIso = '2026-01-12T09:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -141,7 +143,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-in')
       .send({
         userId: '',
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(400);
@@ -162,7 +164,8 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('正常系: clock-outで退勤の打刻イベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-13T00:00:00.000Z';
+    const workDate = '2026-01-13';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const clockInOccurredAtIso = '2026-01-13T09:00:00.000Z';
     const clockOutOccurredAtIso = '2026-01-13T18:00:00.000Z';
     const recordId = ulid();
@@ -189,7 +192,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-out')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: clockOutOccurredAtIso,
       })
       .expect(200);
@@ -225,7 +228,7 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('異常系: clock-outで出勤記録が存在しない場合は404で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-14T00:00:00.000Z';
+    const workDate = '2026-01-14';
     const occurredAtIso = '2026-01-14T18:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -233,7 +236,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-out')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(404);
@@ -252,7 +255,7 @@ describeDb('AttendanceRecordController (integration)', () => {
   });
 
   it('異常系: clock-outでuserIdが空文字の場合は400で返る', async () => {
-    const workDateIso = '2026-01-15T00:00:00.000Z';
+    const workDate = '2026-01-15';
     const occurredAtIso = '2026-01-15T18:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -260,7 +263,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/clock-out')
       .send({
         userId: '',
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(400);
@@ -281,7 +284,8 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('正常系: break-startで休憩開始の打刻イベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-17T00:00:00.000Z';
+    const workDate = '2026-01-17';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const clockInOccurredAtIso = '2026-01-17T09:00:00.000Z';
     const breakStartOccurredAtIso = '2026-01-17T12:00:00.000Z';
     const recordId = ulid();
@@ -308,7 +312,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-start')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: breakStartOccurredAtIso,
       })
       .expect(200);
@@ -341,7 +345,7 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('異常系: break-startで出勤記録が存在しない場合は404で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-18T00:00:00.000Z';
+    const workDate = '2026-01-18';
     const occurredAtIso = '2026-01-18T12:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -349,7 +353,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-start')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(404);
@@ -368,7 +372,7 @@ describeDb('AttendanceRecordController (integration)', () => {
   });
 
   it('異常系: break-startでuserIdが空文字の場合は400で返る', async () => {
-    const workDateIso = '2026-01-19T00:00:00.000Z';
+    const workDate = '2026-01-19';
     const occurredAtIso = '2026-01-19T12:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -376,7 +380,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-start')
       .send({
         userId: '',
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(400);
@@ -397,7 +401,8 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('正常系: break-endで休憩終了の打刻イベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-20T00:00:00.000Z';
+    const workDate = '2026-01-20';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const clockInOccurredAtIso = '2026-01-20T09:00:00.000Z';
     const breakStartOccurredAtIso = '2026-01-20T12:00:00.000Z';
     const breakEndOccurredAtIso = '2026-01-20T13:00:00.000Z';
@@ -433,7 +438,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-end')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: breakEndOccurredAtIso,
       })
       .expect(200);
@@ -467,7 +472,7 @@ describeDb('AttendanceRecordController (integration)', () => {
 
   it('異常系: break-endで出勤記録が存在しない場合は404で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-21T00:00:00.000Z';
+    const workDate = '2026-01-21';
     const occurredAtIso = '2026-01-21T13:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -475,7 +480,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-end')
       .send({
         userId,
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(404);
@@ -494,7 +499,7 @@ describeDb('AttendanceRecordController (integration)', () => {
   });
 
   it('異常系: break-endでuserIdが空文字の場合は400で返る', async () => {
-    const workDateIso = '2026-01-22T00:00:00.000Z';
+    const workDate = '2026-01-22';
     const occurredAtIso = '2026-01-22T13:00:00.000Z';
 
     // supertest の型定義が厳密なため、httpServer を never にキャスト
@@ -502,7 +507,7 @@ describeDb('AttendanceRecordController (integration)', () => {
       .post('/attendance-record/break-end')
       .send({
         userId: '',
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
       })
       .expect(400);

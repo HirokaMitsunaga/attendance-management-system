@@ -146,7 +146,8 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('正常系: resubmit/clock-inでREQUESTEDイベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-20T00:00:00.000Z';
+    const workDate = '2026-01-20';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-20T09:00:00.000Z';
     const initialReason = '初回申請理由';
     const resubmitReason = '再申請理由';
@@ -163,7 +164,7 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
       .post('/attendance-correction/resubmit/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: resubmitReason,
       })
@@ -195,7 +196,8 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('正常系: resubmit/clock-outでREQUESTEDイベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-21T00:00:00.000Z';
+    const workDate = '2026-01-21';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-21T18:00:00.000Z';
 
     await seedRejectedCorrection({
@@ -210,7 +212,7 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
       .post('/attendance-correction/resubmit/clock-out')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: '再申請理由',
       })
@@ -239,7 +241,8 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('正常系: resubmit/break-startでREQUESTEDイベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-22T00:00:00.000Z';
+    const workDate = '2026-01-22';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-22T12:00:00.000Z';
 
     await seedRejectedCorrection({
@@ -254,7 +257,7 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
       .post('/attendance-correction/resubmit/break-start')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: '再申請理由',
       })
@@ -283,7 +286,8 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('正常系: resubmit/break-endでREQUESTEDイベントが追加される', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-23T00:00:00.000Z';
+    const workDate = '2026-01-23';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-23T13:00:00.000Z';
 
     await seedRejectedCorrection({
@@ -298,7 +302,7 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
       .post('/attendance-correction/resubmit/break-end')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: occurredAtIso,
         reason: '再申請理由',
       })
@@ -327,13 +331,13 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('異常系: 勤怠修正申請が存在しない場合は404で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-24T00:00:00.000Z';
+    const workDate = '2026-01-24';
 
     const res = await request(httpServer as never)
       .post('/attendance-correction/resubmit/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: '2026-01-24T09:00:00.000Z',
         reason: '再申請理由',
       })
@@ -348,7 +352,8 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
 
   it('異常系: 差し戻し以外（申請中）の勤怠修正は再申請できず400で返る', async () => {
     const userId = ulid();
-    const workDateIso = '2026-01-25T00:00:00.000Z';
+    const workDate = '2026-01-25';
+    const workDateIso = `${workDate}T00:00:00.000Z`;
 
     // REQUESTEDのみ（PENDING）
     await prisma.attendanceCorrection.create({
@@ -382,7 +387,7 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
       .post('/attendance-correction/resubmit/clock-in')
       .set('x-user-id', userId)
       .send({
-        workDate: workDateIso,
+        workDate,
         occurredAt: '2026-01-25T09:10:00.000Z',
         reason: '再申請理由',
       })

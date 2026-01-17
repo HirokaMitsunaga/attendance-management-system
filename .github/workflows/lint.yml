@@ -28,7 +28,7 @@ jobs:
       - name: Check Prettier formatting
         run: |
           cd backend
-          npx prettier --check "src/**/*.{ts,tsx}" "test/**/*.{ts,tsx}"
+          npm run format
 
   lint-frontend:
     name: Lint Frontend
