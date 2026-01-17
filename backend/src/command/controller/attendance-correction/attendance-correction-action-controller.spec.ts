@@ -38,6 +38,23 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
     await prisma.attendanceRecord.deleteMany();
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
+
+    // 勤怠修正申請（request/*）は勤怠ルールがないと 404 になるため、常に用意する
+    await prisma.attendanceRule.createMany({
+      data: [
+        {
+          id: ulid(),
+          targets: ['CLOCK_IN'],
+          type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+          setting: {
+            type: 'ALLOW_CLOCK_IN_ONLY_BEFORE_TIME',
+            latestClockInTime: '23:59',
+          },
+          enabled: true,
+        },
+      ],
+    });
   });
 
   afterEach(async () => {
@@ -46,6 +63,7 @@ describeDb('AttendanceCorrectionActionController (integration)', () => {
     await prisma.attendanceRecord.deleteMany();
     await prisma.attendanceCorrectionEvent.deleteMany();
     await prisma.attendanceCorrection.deleteMany();
+    await prisma.attendanceRule.deleteMany();
   });
 
   afterAll(async () => {
