@@ -332,7 +332,6 @@ describeDb('AttendanceCorrectionResubmitController (integration)', () => {
   it('異常系: 勤怠修正申請が存在しない場合は404で返る', async () => {
     const userId = ulid();
     const workDate = '2026-01-24';
-    const workDateIso = `${workDate}T00:00:00.000Z`;
 
     const res = await request(httpServer as never)
       .post('/attendance-correction/resubmit/clock-in')

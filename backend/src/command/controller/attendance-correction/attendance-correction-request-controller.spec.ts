@@ -297,7 +297,6 @@ describeDb('AttendanceCorrectionRequestController (integration)', () => {
   it('異常系: 同一ユーザー・同一勤務日で既に勤怠修正申請がある場合は400で返る', async () => {
     const userId = ulid();
     const workDate = '2026-01-15';
-    const workDateIso = `${workDate}T00:00:00.000Z`;
     const occurredAtIso = '2026-01-15T09:00:00.000Z';
     const reason = '打刻漏れ';
 
