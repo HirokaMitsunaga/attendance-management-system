@@ -28,7 +28,7 @@ jobs:
       - name: Check Prettier formatting
         run: |
           cd backend
-          npx prettier --check --no-error-on-unmatched-pattern "src/**/*.{ts,tsx}"
+          npm run format
 
   lint-frontend:
     name: Lint Frontend
