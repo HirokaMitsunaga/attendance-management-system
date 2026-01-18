@@ -1,0 +1,1 @@
+export const ATTENDANCE_RECORD_DAO = Symbol('ATTENDANCE_RECORD_DAO');
