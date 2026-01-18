@@ -1,17 +1,19 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggerModule } from './config/logger.module';
-import { AttendanceRecordModule } from './command/attendance-record.module';
+import { AttendanceRecordModule as CommandAttendanceRecordModule } from './command/attendance-record.module';
 import { AttendanceCorrectionModule } from './command/attendance-correction.module';
 import { AttendanceRuleModule } from './command/attendance-rule.module';
+import { AttendanceRecordModule as QueryAttendanceRecordModule } from './query/attendance-record.module';
 
 @Module({
   imports: [
     LoggerModule,
     PrismaModule,
-    AttendanceRecordModule,
+    CommandAttendanceRecordModule,
     AttendanceCorrectionModule,
     AttendanceRuleModule,
+    QueryAttendanceRecordModule,
   ],
   controllers: [],
   providers: [],
