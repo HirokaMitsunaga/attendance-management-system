@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Controller, Get, HttpCode, Query } from '@nestjs/common';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { GetAttendanceRecordUseCase } from '../usecase/attendance-record/get-attendance-record.use-case';
 import {
@@ -13,12 +13,12 @@ export class AttendanceRecordController {
     private readonly getAttendanceRecordUseCase: GetAttendanceRecordUseCase,
   ) {}
 
-  @Post()
+  @Get()
   @HttpCode(200)
   async getAttendanceEvents(
-    @Body(new ZodValidationPipe(getEventRequestSchema))
-    body: GetEventRequestDto,
+    @Query(new ZodValidationPipe(getEventRequestSchema))
+    query: GetEventRequestDto,
   ): Promise<GetEventResponseDto> {
-    return this.getAttendanceRecordUseCase.execute(body);
+    return this.getAttendanceRecordUseCase.execute(query);
   }
 }
