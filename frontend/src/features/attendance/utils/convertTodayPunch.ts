@@ -1,20 +1,13 @@
 import { ATTENDANCE_STATUS } from '../types/attendance-status';
 import type {
   FinishedStatus,
-  NotStartedStatus,
   TodayStatus,
   WorkingStatus,
 } from '../types/todday-status';
 import type { GetEventResponseDto } from '../types/get-event-response-dto';
 import { calcWorkingHours } from '@/utils/calcWorkingHours';
 import { extractTimeFromISO } from '@/utils/extractTimeFromISO';
-
-const NOT_STARTED_STATUS: NotStartedStatus = {
-  clockIn: null,
-  clockOut: null,
-  workingHours: '--',
-  status: ATTENDANCE_STATUS.NOT_STARTED,
-};
+import { NOT_STARTED_STATUS } from '../constants/notStartedStatus';
 
 export const convertTodayPunch = (
   punch: GetEventResponseDto[],
