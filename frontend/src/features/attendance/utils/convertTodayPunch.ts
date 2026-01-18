@@ -12,8 +12,16 @@ import { NOT_STARTED_STATUS } from '../constants/notStartedStatus';
 export const convertTodayPunch = (
   punch: GetEventResponseDto[],
 ): TodayStatus => {
-  const clockInEvent = punch.find((p) => p.punchType === 'CLOCK_IN');
-  const clockOutEvent = punch.find((p) => p.punchType === 'CLOCK_OUT');
+  // バックエンドのlatestWorkStatus()と整合させるため、最新のイベントを取得
+  // 配列はoccurredAtの昇順でソートされているため、末尾から検索する
+  const clockInEvent = punch
+    .slice()
+    .reverse()
+    .find((p) => p.punchType === 'CLOCK_IN');
+  const clockOutEvent = punch
+    .slice()
+    .reverse()
+    .find((p) => p.punchType === 'CLOCK_OUT');
 
   if (clockInEvent && clockOutEvent) {
     const clockIn = extractTimeFromISO(clockInEvent.occurredAt);
