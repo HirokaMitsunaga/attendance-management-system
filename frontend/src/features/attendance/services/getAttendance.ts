@@ -1,4 +1,4 @@
-import { convertTodayPunch } from '@/features/attendance/lib/convertTodayPunch';
+import { convertTodayPunch } from '@/features/attendance/utils/convertTodayPunch';
 import { ATTENDANCE_STATUS } from '@/features/attendance/types/attendance-status';
 import { GetEventResponseDto } from '@/features/attendance/types/get-event-response-dto';
 import {

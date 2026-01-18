@@ -1,6 +1,6 @@
 import { useSWRConfig } from 'swr';
 import { toast } from 'react-hot-toast';
-import { getTodayDateString } from '../lib/getTodayDateString';
+import { getTodayDateString } from '../utils/getTodayDateString';
 import { clockIn } from '../services/clockIn';
 import { clockOut } from '../services/clockOut';
 

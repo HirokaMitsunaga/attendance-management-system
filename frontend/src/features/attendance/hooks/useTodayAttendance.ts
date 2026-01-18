@@ -2,7 +2,7 @@
 
 import useSWR from 'swr';
 import type { TodayStatus } from '../types/todday-status';
-import { getTodayDateString } from '../lib/getTodayDateString';
+import { getTodayDateString } from '../utils/getTodayDateString';
 import { getAttendance } from '@/features/attendance/services/getAttendance';
 
 export const useTodayAttendance = () => {
