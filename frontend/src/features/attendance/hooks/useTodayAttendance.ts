@@ -1,27 +1,25 @@
-// useTodayAttendance.ts
+'use client';
+
 import useSWR from 'swr';
-import { ATTENDANCE_STATUS } from '../types/attendance-status';
-import type { TodayStatus, NotStartedStatus } from '../types/todday-status';
-
-// 初期モックデータ（未出勤状態）
-const INITIAL_MOCK_DATA: NotStartedStatus = {
-  clockIn: null,
-  clockOut: null,
-  workingHours: '--',
-  status: ATTENDANCE_STATUS.NOT_STARTED,
-};
-
-// モック用のfetcher（実際のAPIでは不要）
-const mockFetcher = async (): Promise<TodayStatus> => {
-  // 初回読み込み時の初期データを返す
-  return INITIAL_MOCK_DATA;
-};
+import type { TodayStatus } from '../types/todday-status';
+import { getTodayDateString } from '../utils/getTodayDateString';
+import { apiClient } from '@/libs/api-client';
+import { GetEventResponseDto } from '../types/get-event-response-dto';
+import { convertTodayPunch } from '../utils/convertTodayPunch';
 
 export const useTodayAttendance = () => {
-  // SWRを使ってデータを管理（キー: '/attendance/today'）
+  // TODO: 実際のユーザーIDを取得する方法に置き換える
+  const userId = '01KERGSFDE735M6VFWVVQCPPZ3'; // 仮のユーザーID
+  const workDate = getTodayDateString();
+
   const { data, error, isLoading } = useSWR<TodayStatus>(
-    '/attendance/today',
-    mockFetcher,
+    ['/attendance/today', userId, workDate],
+    async () => {
+      const punch = await apiClient<GetEventResponseDto[]>(
+        `/attendance-record?userId=${userId}&workDate=${workDate}`,
+      );
+      return convertTodayPunch(punch);
+    },
   );
 
   return {
