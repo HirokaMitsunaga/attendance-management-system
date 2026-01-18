@@ -1,8 +1,7 @@
 import { useSWRConfig } from 'swr';
 import { toast } from 'react-hot-toast';
 import { getTodayDateString } from '../utils/getTodayDateString';
-import { clockIn } from '../services/clockIn';
-import { clockOut } from '../services/clockOut';
+import { apiClient } from '@/libs/api-client';
 
 export const useAttendanceActions = () => {
   const { mutate } = useSWRConfig();
@@ -13,7 +12,10 @@ export const useAttendanceActions = () => {
   const handleClockIn = async () => {
     try {
       const occurredAt = new Date().toISOString();
-      await clockIn({ userId, workDate, occurredAt });
+      await apiClient<void>('/attendance-record/clock-in', {
+        method: 'POST',
+        body: { userId, workDate, occurredAt },
+      });
       toast.success('出勤しました');
       // SWRキャッシュを再取得
       await mutate(['/attendance/today', userId, workDate]);
@@ -28,7 +30,10 @@ export const useAttendanceActions = () => {
   const handleClockOut = async () => {
     try {
       const occurredAt = new Date().toISOString();
-      await clockOut({ userId, workDate, occurredAt });
+      await apiClient<void>('/attendance-record/clock-out', {
+        method: 'POST',
+        body: { userId, workDate, occurredAt },
+      });
       toast.success('退勤しました');
       // SWRキャッシュを再取得
       await mutate(['/attendance/today', userId, workDate]);

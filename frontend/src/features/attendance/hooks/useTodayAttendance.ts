@@ -3,7 +3,9 @@
 import useSWR from 'swr';
 import type { TodayStatus } from '../types/todday-status';
 import { getTodayDateString } from '../utils/getTodayDateString';
-import { getAttendance } from '@/features/attendance/services/getAttendance';
+import { apiClient } from '@/libs/api-client';
+import { GetEventResponseDto } from '../types/get-event-response-dto';
+import { convertTodayPunch } from '../utils/convertTodayPunch';
 
 export const useTodayAttendance = () => {
   // TODO: 実際のユーザーIDを取得する方法に置き換える
@@ -12,7 +14,12 @@ export const useTodayAttendance = () => {
 
   const { data, error, isLoading } = useSWR<TodayStatus>(
     ['/attendance/today', userId, workDate],
-    () => getAttendance({ userId, workDate }),
+    async () => {
+      const punch = await apiClient<GetEventResponseDto[]>(
+        `/attendance-record?userId=${userId}&workDate=${workDate}`,
+      );
+      return convertTodayPunch(punch);
+    },
   );
 
   return {
