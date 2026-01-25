@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ATTENDANCE_CORRECTION_TYPE } from '../types/attendance-correction-type';
 
 export const AttendanceCorrectionSchema = z.object({
-  date: z.iso.date({ message: '日付の形式が不正です。' }),
+  date: z.date({ message: '日付の形式が不正です。' }),
   correctionType: z.enum(
     [
       ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.value,
