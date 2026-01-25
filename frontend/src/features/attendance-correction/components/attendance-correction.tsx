@@ -61,7 +61,7 @@ export const AttendanceCorrection = () => {
                 className="space-y-6"
               >
                 <InputField
-                  name="date"
+                  name="workDate"
                   label="対象日"
                   type="date"
                   icon={Calendar}
@@ -80,7 +80,7 @@ export const AttendanceCorrection = () => {
                   {correctionType ===
                     ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.value && (
                     <InputField
-                      name="time"
+                      name="occurredAt"
                       label={`修正後の${ATTENDANCE_CORRECTION_TYPE.CLOCK_IN.label}`}
                       type="time"
                       icon={Clock}
@@ -90,7 +90,7 @@ export const AttendanceCorrection = () => {
                   {correctionType ===
                     ATTENDANCE_CORRECTION_TYPE.CLOCK_OUT.value && (
                     <InputField
-                      name="time"
+                      name="occurredAt"
                       label={`修正後の${ATTENDANCE_CORRECTION_TYPE.CLOCK_OUT.label}`}
                       type="time"
                       icon={Clock}

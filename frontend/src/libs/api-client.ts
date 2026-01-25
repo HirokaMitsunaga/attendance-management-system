@@ -24,7 +24,8 @@ export const apiClient = async <T>(
   const authHeaders: Record<string, string> = isDev
     ? {
         Authorization: 'Bearer dev-token',
-        'x-user-id': process.env.NEXT_PUBLIC_DEV_USER_ID || 'system',
+        'x-user-id':
+          process.env.NEXT_PUBLIC_DEV_USER_ID || '01KERGSFDE735M6VFWVVQCPPZ3',
       }
     : {};
 

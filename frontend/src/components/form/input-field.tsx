@@ -38,7 +38,14 @@ export const InputField = <TFieldValues extends FieldValues>({
         <Icon className="h-4 w-4" />
         {label}
       </Label>
-      <Input id={name} type={type} className={className} {...register(name)} />
+      <Input
+        id={name}
+        type={type}
+        className={className}
+        {...register(name, {
+          ...(type === 'date' && { valueAsDate: true }),
+        })}
+      />
       {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
       {currentValue && (
         <p className="text-sm text-muted-foreground">現在: {currentValue}</p>
