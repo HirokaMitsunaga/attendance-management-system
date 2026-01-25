@@ -23,11 +23,11 @@ export const useAttendanceCorrectionActions = () => {
   ): Promise<boolean> => {
     try {
       // workDate: DateオブジェクトからYYYY-MM-DD形式の文字列に変換
-      const workDate = getYYYYMMDDDateString(data.date);
+      const workDate = getYYYYMMDDDateString(data.workDate);
 
       // occurredAt: 日付と時刻を組み合わせてISO 8601形式の文字列に変換
-      const dateStr = getYYYYMMDDDateString(data.date);
-      const occurredAt = `${dateStr}T${data.time}:00.000Z`;
+      const dateStr = getYYYYMMDDDateString(data.workDate);
+      const occurredAt = `${dateStr}T${data.occurredAt}:00.000Z`;
 
       const reason = data.reason;
       const endpoint = endpointMap[data.correctionType];
